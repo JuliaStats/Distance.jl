@@ -4,11 +4,11 @@ Evaluation of distances between vectors.
 
 ## A List of supported distances
 
-* Minkowski distance
 * Euclidean distance
 * Squared euclidean distance
 * Cityblock distance 
 * Chebyshev distance
+* Minkowski distance
 * Hamming distance
 * Cosine distance
 * Spearman distance
