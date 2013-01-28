@@ -18,6 +18,13 @@ function sqeuc_raw_forloop{T<:Real}(a::AbstractMatrix{T}, b::AbstractMatrix{T})
 	return r
 end
 
+
+function sqeuc_sumsqr_vectorized{T<:Real}(a::AbstractMatrix{T}, b::AbstractMatrix{T})
+	# completely vectorized without for-loop
+	r = sqrt(sum((a - b) .^ 2))
+end
+
+
 function sqeuc_sumsqr_percol{T<:Real}(a::AbstractMatrix{T}, b::AbstractMatrix{T})
 	# take the some of vectorized square per column
 	n = size(a, 2)
@@ -75,6 +82,7 @@ x = rand(m, n)
 y = rand(m, n)
 
 @my_bench sqeuc_raw_forloop
+@my_bench sqeuc_sumsqr_vectorized
 @my_bench sqeuc_sumsqr_percol
 @my_bench sqeuc_norm_percol
 @my_bench sqeuc_norm_percol_s
