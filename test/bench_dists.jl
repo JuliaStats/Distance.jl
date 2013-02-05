@@ -2,62 +2,14 @@
 # This scripts compares the performance of different ways to implement column-wise 
 # euclidean distances
 
+using Metrics
 
-function sqeuc_raw_forloop{T<:Real}(a::AbstractMatrix{T}, b::AbstractMatrix{T})
-	# completely de-vectorized for-loop
-	m, n = size(a)
-	r = Array(T, n)
-	for j = 1 : n
-		s::T = 0
-		for i = 1 : m
-			v = a[i, j] - b[i, j]
-			s += v * v
-		end
-		r[j] = sqrt(s)
-	end
-	return r
+function sqeuc_pw(a::Matrix, b::Matrix)
+	r = pairwise(SqEuclidean(), a, b)
 end
 
-
-function sqeuc_sumsqr_vectorized{T<:Real}(a::AbstractMatrix{T}, b::AbstractMatrix{T})
-	# completely vectorized without for-loop
-	r = sqrt(sum((a - b) .^ 2))
-end
-
-
-function sqeuc_sumsqr_percol{T<:Real}(a::AbstractMatrix{T}, b::AbstractMatrix{T})
-	# take the some of vectorized square per column
-	n = size(a, 2)
-	r = Array(T, n)
-	for i = 1 : n
-		r[i] = sqrt(sum( (a[:,i] - b[:,i]) .^ 2 ))
-	end
-	return r
-end
-
-function sqeuc_norm_percol{T<:Real}(a::AbstractMatrix{T}, b::AbstractMatrix{T})
-	# take norm of vectorized difference per column
-	n = size(a, 2)
-	r = Array(T, n)
-	for i = 1 : n
-		r[i] = norm(a[:,i] - b[:,i])
-	end
-	return r
-end
-
-function sqeuc_norm_percol_s{T<:Real}(a::AbstractMatrix{T}, b::AbstractMatrix{T})
-	# take norm of vectorized difference per column (using sub)
-	m, n = size(a)
-	r = Array(T, n)
-	for i = 1 : n
-		r[i] = norm(sub(a, 1:m, i) - sub(b, 1:m, i))
-	end
-	return r
-end
-
-function sqeuc_map_norm{T<:Real}(a::AbstractMatrix{T}, b::AbstractMatrix{T})
-	# map a norm function to each column
-	r = map( i -> norm(a[:,i] - b[:,i]),  1:size(a,2) )
+function euc_pw(a::Matrix, b::Matrix)
+	r = pairwise(Euclidean(), a, b)
 end
 
 
@@ -75,15 +27,11 @@ macro my_bench(f)
 end
 
 
-m = 200
-n = 100000
+m = 1000
+n = 1000
 
 x = rand(m, n)
 y = rand(m, n)
 
-@my_bench sqeuc_raw_forloop
-@my_bench sqeuc_sumsqr_vectorized
-@my_bench sqeuc_sumsqr_percol
-@my_bench sqeuc_norm_percol
-@my_bench sqeuc_norm_percol_s
-@my_bench sqeuc_map_norm
+@my_bench sqeuc_pw
+#@my_bench euc_pw
