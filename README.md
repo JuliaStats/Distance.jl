@@ -1,6 +1,6 @@
-# Distances
+# Metrics
 
-Evaluation of distances between vectors.
+Evaluation of metrics(distances) between vectors.
 
 ## A List of supported distances
 
@@ -11,6 +11,7 @@ Evaluation of distances between vectors.
 * Minkowski distance
 * Hamming distance
 * Cosine distance
+* Correlation distance
 * Spearman distance
 * Kullback-Leibler divergence
 * Jensen-Shannon divergence
@@ -23,5 +24,5 @@ Evaluation of distances between vectors.
 	- compute distances between a vector and an array comprised of multiple vectors
 	- compute distances between corresponding vectors in two arrays along a specific dimension
 	- compute distances between columns in two matrices in a pairwise manner
-* Specialized functions are used to compute pairwise (Squared) Euclidean distances in a much faster way.	
+* Specialized functions are used to compute some distances (e.g. Euclidean) in a much faster way.	
 	
