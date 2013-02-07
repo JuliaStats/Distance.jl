@@ -75,6 +75,11 @@ w = rand(size(x))
 @test weighted_minkowski(x, x, w, 2) == 0.
 @test is_approx(weighted_minkowski(x, y, w, 2), weighted_euclidean(x, y, w), 1.0e-14)
 
+w = rand(size(a))
+
+@test weighted_hamming(a, a, w) == 0.
+@test weighted_hamming(a, b, w) == sum((a .!= b) .* w)
+
 
 # test column-wise metrics
 
@@ -126,6 +131,8 @@ w = rand(m)
 @test_colwise WeightedEuclidean(w) X Y 1.0e-14
 @test_colwise WeightedCityblock(w) X Y 1.0e-14
 @test_colwise WeightedMinkowski(w, 2.5) X Y 1.0e-14
+@test_colwise WeightedHamming(w) A B 1.0e-14
+
 
 # test pairwise metrics
 
@@ -177,4 +184,5 @@ w = rand(m)
 @test_pairwise WeightedEuclidean(w) X Y 1.0e-14
 @test_pairwise WeightedCityblock(w) X Y 1.0e-14
 @test_pairwise WeightedMinkowski(w, 2.5) X Y 1.0e-14 
+@test_pairwise WeightedHamming(w) A B 1.0e-14
 

@@ -1249,6 +1249,79 @@ function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedMinkowski{T}, a::M
 end
 
 
+# WeightedHamming
+
+function evaluate{T<:FloatingPoint}(dist::WeightedHamming{T}, a::Vector, b::Vector)
+	w = dist.weights
+	sum((a .!= b) .* w)
+end
+
+weighted_hamming(a::Vector, b::Vector, w::Vector) = evaluate(WeightedHamming(w), a, b)
+
+function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedHamming{T}, a::Matrix, b::Matrix)
+	w = dist.weights
+	m, n = get_colwise_dims(length(w), r, a, b)
+	for j = 1 : n
+		d = zero(T)
+		for i = 1 : m
+			if (a[i,j] != b[i,j]) 
+				d += w[i]
+			end
+		end
+		r[j] = d
+	end
+end
+
+function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedHamming{T}, a::Vector, b::Matrix)
+	w = dist.weights
+	m, n = get_colwise_dims(length(w), r, a, b)
+	for j = 1 : n
+		d = zero(T)
+		for i = 1 : m
+			if (a[i] != b[i,j]) 
+				d += w[i]
+			end
+		end
+		r[j] = d
+	end
+end
+
+function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedHamming{T}, a::Matrix, b::Matrix)
+	w = dist.weights
+	m, na, nb = get_pairwise_dims(length(w), r, a, b)
+	for j = 1 : nb
+		for i = 1 : na
+			d = zero(T)
+			for k = 1 : m
+				if a[k,i] != b[k,j]
+					d += w[k]
+				end	
+			end
+			r[i,j] = d
+		end
+	end
+end
+
+function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedHamming{T}, a::Matrix)
+	w = dist.weights
+	m, n = get_pairwise_dims(r, a)
+	for j = 1 : n
+		for i = 1 : j-1
+			r[i,j] = r[j,i]
+		end
+		r[j,j] = 0
+		for i = j+1 : n
+			d = zero(T)
+			for k = 1 : m
+				if a[k,i] != a[k,j]
+					d += w[k]
+				end
+			end
+			r[i,j] = d
+		end
+	end
+end
+
 
 end # module end
 	
