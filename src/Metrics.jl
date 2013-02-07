@@ -59,7 +59,7 @@ export
 	evaluate,
 	
 	# other convenient functions
-	At_Q_B, At_Q_A, A_Q_Bt, A_Q_At
+	At_Q_B, At_Q_A
 
 
 include("at_q_b.jl")
@@ -273,7 +273,7 @@ end
 
 function get_pairwise_dims(d::Int, r::Matrix, a::Matrix)
 	n = size(a, 2)
-	if !(size(a, 1) == size(b, 1) == d)
+	if !(size(a, 1) == d)
 		throw(ArgumentError("Incorrect vector dimensions."))
 	end
 	if !(size(r) == (n, n))
@@ -290,35 +290,35 @@ end
 #
 ###########################################################
 
-function colwise!(r::Array, metric::PreMetric, a::Vector, b::Matrix)
-	n = size(b, 2)
-	if length(r) != n
-		throw(ArgumentError("Incorrect size of r."))
-	end
-	for j = 1 : n
-		r[j] = evaluate(metric, a, b[:,j])
-	end
-end
-
-function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Vector)
-	n = size(a, 2)
-	if length(r) != n
-		throw(ArgumentError("Incorrect size of r."))
-	end
-	for j = 1 : n
-		r[j] = evaluate(metric, a[:,j], b)
-	end
-end
-
-function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Matrix)
-	n = get_common_ncols(a, b)
-	if length(r) != n
-		throw(ArgumentError("Incorrect size of r."))
-	end
-	for j = 1 : n
-		r[j] = evaluate(metric, a[:,j], b[:,j])
-	end
-end
+# function colwise!(r::Array, metric::PreMetric, a::Vector, b::Matrix)
+# 	n = size(b, 2)
+# 	if length(r) != n
+# 		throw(ArgumentError("Incorrect size of r."))
+# 	end
+# 	for j = 1 : n
+# 		r[j] = evaluate(metric, a, b[:,j])
+# 	end
+# end
+# 
+# function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Vector)
+# 	n = size(a, 2)
+# 	if length(r) != n
+# 		throw(ArgumentError("Incorrect size of r."))
+# 	end
+# 	for j = 1 : n
+# 		r[j] = evaluate(metric, a[:,j], b)
+# 	end
+# end
+# 
+# function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Matrix)
+# 	n = get_common_ncols(a, b)
+# 	if length(r) != n
+# 		throw(ArgumentError("Incorrect size of r."))
+# 	end
+# 	for j = 1 : n
+# 		r[j] = evaluate(metric, a[:,j], b[:,j])
+# 	end
+# end
 
 function colwise!(r::Array, metric::SemiMetric, a::Matrix, b::Vector)
 	colwise!(r, metric, b, a)
@@ -346,19 +346,19 @@ function colwise(metric::PreMetric, a::Matrix, b::Vector)
 end
 
 
-function pairwise!(r::Matrix, metric::PreMetric, a::Matrix, b::Matrix)
-	na = size(a, 2)
-	nb = size(b, 2)
-	if !(size(r) == (na, nb))
-		throw(ArgumentError("Incorrect size of r."))
-	end
-	for j = 1 : size(b, 2)
-		bj = b[:,j]
-		for i = 1 : size(a, 2)
-			r[i,j] = evaluate(metric, a[:,i], bj)
-		end
-	end
-end
+# function pairwise!(r::Matrix, metric::PreMetric, a::Matrix, b::Matrix)
+# 	na = size(a, 2)
+# 	nb = size(b, 2)
+# 	if !(size(r) == (na, nb))
+# 		throw(ArgumentError("Incorrect size of r."))
+# 	end
+# 	for j = 1 : size(b, 2)
+# 		bj = b[:,j]
+# 		for i = 1 : size(a, 2)
+# 			r[i,j] = evaluate(metric, a[:,i], bj)
+# 		end
+# 	end
+# end
 
 function pairwise!(r::Matrix, metric::PreMetric, a::Matrix)
 	pairwise!(r, metric, a, a)
@@ -366,22 +366,22 @@ end
 
 
 # faster evaluation by leveraging the properties of semi-metrics
-function pairwise!(r::Matrix, metric::SemiMetric, a::Matrix)
-	n = size(a, 2)
-	if !(size(r) == (n, n))
-		throw(ArgumentError("Incorrect size of r."))
-	end
-	for j = 1 : n
-		for i = 1 : j-1
-			a[i,j] = a[j,i]
-		end
-		a[j,j] = 0
-		bj = b[:,j]
-		for i = j+1 : n
-			a[i,j] = evaluate(metric, a[:,i], bj)
-		end
-	end
-end
+# function pairwise!(r::Matrix, metric::SemiMetric, a::Matrix)
+# 	n = size(a, 2)
+# 	if !(size(r) == (n, n))
+# 		throw(ArgumentError("Incorrect size of r."))
+# 	end
+# 	for j = 1 : n
+# 		for i = 1 : j-1
+# 			a[i,j] = a[j,i]
+# 		end
+# 		a[j,j] = 0
+# 		bj = b[:,j]
+# 		for i = j+1 : n
+# 			a[i,j] = evaluate(metric, a[:,i], bj)
+# 		end
+# 	end
+# end
 
 function pairwise(metric::PreMetric, a::Matrix, b::Matrix)
 	m = size(a, 2)
@@ -427,7 +427,7 @@ function colwise!(r::Array, dist::SqEuclidean, a::Matrix, b::Matrix)
 end
 
 function colwise!(r::Array, dist::SqEuclidean, a::Vector, b::Matrix)
-	n = get_colwise_dims(r, a, b)
+	m, n = get_colwise_dims(r, a, b)
 	for j = 1 : n
 		@devec r[j] = sum(sqr(a - b[:,j]))
 	end
@@ -1045,26 +1045,35 @@ end
 weighted_sqeuclidean(a::Vector, b::Vector, w::Vector) = evaluate(WeightedSqEuclidean(w), a, b)
 
 function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedSqEuclidean{T}, a::Matrix, b::Matrix)
-	get_colwise_dims(r, a, b)
 	w = dist.weights
+	m, n = get_colwise_dims(length(w), r, a, b)
 	for j = 1 : n
 		@devec r[j] = sum(sqr(a[:,j] - b[:,j]) .* w)
 	end
 end
 
 function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedSqEuclidean{T}, a::Vector, b::Matrix)
-	n = get_colwise_dims(r, a, b)
 	w = dist.weights
+	m, n = get_colwise_dims(length(w), r, a, b)
 	for j = 1 : n
 		@devec r[j] = sum(sqr(a - b[:,j]) .* w)
 	end
 end
 
 function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedSqEuclidean{T}, a::Matrix, b::Matrix)
-	m, na, nb = get_pairwise_dims(r, a, b)
-	At_mul_B(r, a, b)
-	@devec sa2 = sum(sqr(a), 1)
-	@devec sb2 = sum(sqr(b), 1)
+	w = dist.weights
+	m, na, nb = get_pairwise_dims(length(w), r, a, b)
+	
+	sa2 = Array(T, na)
+	sb2 = Array(T, nb)
+	for i = 1 : na
+		@devec sa2[i] = sum(sqr(a[:,i]) .* w)		
+	end
+	for j = 1 : nb
+		@devec sb2[j] = sum(sqr(b[:,j]) .* w)
+	end
+		
+	At_Q_B!(r, w, a, b)
 	for j = 1 : nb
 		for i = 1 : na
 			r[i,j] = sa2[i] + sb2[j] - 2 * r[i,j]
@@ -1073,9 +1082,15 @@ function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedSqEuclidean{T}, a:
 end
 
 function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedSqEuclidean{T}, a::Matrix)
-	m, n = get_pairwise_dims(r, a)
-	At_mul_B(r, a, a)
-	@devec sa2 = sum(sqr(a), 1)
+	w = dist.weights
+	m, n = get_pairwise_dims(length(w), r, a)
+	
+	sa2 = Array(T, n)
+	for i = 1 : n
+		@devec sa2[i] = sum(sqr(a[:,i]) .* w)		
+	end
+	
+	At_Q_A!(r, w, a)
 	for j = 1 : n
 		for i = 1 : j-1
 			r[i,j] = r[j,i]
@@ -1083,6 +1098,85 @@ function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedSqEuclidean{T}, a:
 		r[j,j] = 0
 		for i = j+1 : n
 			r[i,j] = sa2[i] + sa2[j] - 2 * r[i,j]
+		end
+	end
+end
+
+
+# Weighted Euclidean
+
+function evaluate{T<:FloatingPoint}(dist::WeightedEuclidean{T}, a::Vector, b::Vector)
+	sqrt(evaluate(WeightedSqEuclidean(dist.weights), a, b))
+end
+
+weighted_euclidean(a::Vector, b::Vector, w::Vector) = evaluate(WeightedEuclidean(w), a, b)
+
+function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedEuclidean{T}, a::Matrix, b::Matrix)
+	colwise!(r, WeightedSqEuclidean(dist.weights), a, b)
+	@devec r[:] = sqrt(r)
+end
+
+function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedEuclidean{T}, a::Vector, b::Matrix)
+	colwise!(r, WeightedSqEuclidean(dist.weights), a, b)
+	@devec r[:] = sqrt(r)
+end
+
+function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedEuclidean{T}, a::Matrix, b::Matrix)
+	pairwise!(r, WeightedSqEuclidean(dist.weights), a, b)
+	@devec r[:] = sqrt(max(r, 0))
+end
+
+function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedEuclidean{T}, a::Matrix)
+	pairwise!(r, WeightedSqEuclidean(dist.weights), a)
+	@devec r[:] = sqrt(max(r, 0))
+end
+
+# Weighted Cityblock
+
+function evaluate{T<:FloatingPoint}(dist::WeightedCityblock{T}, a::Vector, b::Vector)
+	w = dist.weights
+	@devec r = sum(abs(a - b) .* w)
+	return r
+end
+
+weighted_cityblock(a::Vector, b::Vector, w::Vector) = evaluate(WeightedCityblock(w), a, b)
+
+function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedCityblock{T}, a::Matrix, b::Matrix)
+	w = dist.weights
+	m, n = get_colwise_dims(length(w), r, a, b)
+	for j = 1 : n
+		@devec r[j] = sum(abs(a[:,j] - b[:,j]) .* w)
+	end
+end
+
+function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedCityblock{T}, a::Vector, b::Matrix)
+	w = dist.weights
+	m, n = get_colwise_dims(length(w), r, a, b)	
+	for j = 1 : n
+		@devec r[j] = sum(abs(a - b[:,j]) .* w)
+	end
+end
+
+function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedCityblock{T}, a::Matrix, b::Matrix)
+	w = dist.weights
+	m, na, nb = get_pairwise_dims(length(w), r, a, b)	
+	for j = 1 : nb
+		for i = 1 : na
+			@devec r[i,j] = sum(abs(a[:,i] - b[:,j]) .* w)
+		end
+	end
+end
+
+function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedCityblock{T}, a::Matrix)
+	w = dist.weights
+	m, n = get_pairwise_dims(length(w), r, a)	
+	for j = 1 : n
+		for i = 1 : j-1
+			r[i,j] = r[j,i]
+		end
+		r[j,j] = 0
+		for i = j+1 : n
+			@devec r[i,j] = sum(abs(a[:,i] - a[:,j]) .* w)
 		end
 	end
 end

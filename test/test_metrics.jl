@@ -61,6 +61,17 @@ jsv = kl_divergence(p, pm) / 2 + kl_divergence(q, pm) / 2
 @test is_approx(js_divergence(p, p), 0., 1.0e-14)
 @test is_approx(js_divergence(p, q), jsv, 1.0e-14)
 
+w = rand(size(x))
+
+@test weighted_sqeuclidean(x, x, w) == 0.
+@test is_approx(weighted_sqeuclidean(x, y, w), dot((x - y).^2, w), 1.0e-14)
+
+@test weighted_euclidean(x, x, w) == 0.
+@test weighted_euclidean(x, y, w) == sqrt(weighted_sqeuclidean(x, y, w))
+
+@test weighted_cityblock(x, x, w) == 0.
+@test is_approx(weighted_cityblock(x, y, w), dot(abs(x - y), w), 1.0e-14)
+
 
 # test column-wise metrics
 
@@ -106,6 +117,11 @@ end
 @test_colwise KLDivergence() P Q 1.0e-13
 @test_colwise JSDivergence() P Q 1.0e-13
 
+w = rand(m)
+
+@test_colwise WeightedSqEuclidean(w) X Y 1.0e-14
+@test_colwise WeightedEuclidean(w) X Y 1.0e-14
+@test_colwise WeightedCityblock(w) X Y 1.0e-14
 
 # test pairwise metrics
 
@@ -132,6 +148,8 @@ macro test_pairwise(dist, x, y, tol)
 		for j = 1 : nx, i = 1 : nx
 			rxx[i, j] = evaluate($dist, ($x)[:,i], ($x)[:,j])
 		end
+		@test all_approx(pairwise($dist, $x, $y), rxy, $tol)
+		@test all_approx(pairwise($dist, $x), rxx, $tol)
 	end
 end
 
@@ -148,4 +166,10 @@ end
 @test_pairwise ChiSqDist() X Y 1.0e-14
 @test_pairwise KLDivergence() P Q 1.0e-13
 @test_pairwise JSDivergence() P Q 1.0e-13
+
+w = rand(m)
+
+@test_pairwise WeightedSqEuclidean(w) X Y 1.0e-14
+@test_pairwise WeightedEuclidean(w) X Y 1.0e-14
+@test_pairwise WeightedCityblock(w) X Y 1.0e-14
 
