@@ -1,13 +1,11 @@
 module Metrics
 	
-using DeExpr
+using Devectorize
 
 export 
 	# generic types/functions
 	GeneralizedMetric, 
 	Metric,
-	cdist,
-	pdist,
 	
 	# distance classes
 	Euclidean,
@@ -147,7 +145,7 @@ function colwise(metric::PreMetric, a::Matrix, b::Vector)
 end
 
 
-function pairwise!(r::Array, metric::PreMetric, a::Matrix, b::Matrix)
+function pairwise!(r::Matrix, metric::PreMetric, a::Matrix, b::Matrix)
 	for j = 1 : size(b, 2)
 		bj = b[:,j]
 		for i = 1 : size(a, 2)
@@ -156,13 +154,13 @@ function pairwise!(r::Array, metric::PreMetric, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Array, metric::PreMetric, a::Matrix)
+function pairwise!(r::Matrix, metric::PreMetric, a::Matrix)
 	pairwise!(r, metric, a, a)
 end
 
 
 # faster evaluation by leveraging the properties of semi-metrics
-function pairwise!(r::Array, metric::SemiMetric, a::Matrix)
+function pairwise!(r::Matrix, metric::SemiMetric, a::Matrix)
 	n = size(a, 2)
 	for j = 1 : n
 		for i = 1 : j-1
@@ -193,7 +191,7 @@ end
 
 function pairwise(metric::SemiMetric, a::Matrix)
 	n = size(a, 2)
-	r = Array(result_type(metric, eltype(a), eltype(b)), (n, n))
+	r = Array(result_type(metric, eltype(a), eltype(a)), (n, n))
 	pairwise!(r, metric, a)
 	return r
 end
@@ -224,8 +222,8 @@ function colwise!(r::Array, dist::SqEuclidean, a::Vector, b::Matrix)
 	end
 end
 
-function pairwise!(r::Array, dist::SqEuclidean, a::Matrix, b::Matrix)
-	A_mul_Bt(r, a, b)
+function pairwise!(r::Matrix, dist::SqEuclidean, a::Matrix, b::Matrix)
+	At_mul_B(r, a, b)
 	@devec sa2 = sum(sqr(a), 1)
 	@devec sb2 = sum(sqr(b), 1)
 
@@ -233,24 +231,23 @@ function pairwise!(r::Array, dist::SqEuclidean, a::Matrix, b::Matrix)
 	n = size(b, 2)
 	for j = 1 : n
 		for i = 1 : m
-			r[i,j] = (-2) * r[i] + sa2[i] + sb2[j]
+			r[i,j] = sa2[i] + sb2[j] - 2 * r[i,j]
 		end
 	end
 end
 
-function pairwise!(r::Array, dist::SqEuclidean, a::Matrix)
-	A_mul_Bt(r, a, a)
+function pairwise!(r::Matrix, dist::SqEuclidean, a::Matrix)
+	At_mul_B(r, a, a)
 	@devec sa2 = sum(sqr(a), 1)
 
-	m = size(a, 2)
-	n = size(b, 2)
+	n = size(a, 2)
 	for j = 1 : n
 		for i = 1 : j-1
-			r[i,j] = (-2) * r[i] + sa2[i] + sa2[j]
+			r[i,j] = r[j,i]
 		end
 		r[j,j] = 0
 		for i = j+1 : n
-			r[i,j] = (-2) * r[i] + sa2[i] + sa2[j]
+			r[i,j] = sa2[i] + sa2[j] - 2 * r[i,j]
 		end
 	end
 end
@@ -275,13 +272,13 @@ function colwise!(r::Array, dist::Euclidean, a::Vector, b::Matrix)
 	end
 end
 
-function pairwise!(r::Array, dist::Euclidean, a::Matrix, b::Matrix)
+function pairwise!(r::Matrix, dist::Euclidean, a::Matrix, b::Matrix)
 	pairwise!(r, SqEuclidean(), a, b)
 	@devec r[:] = sqrt(max(r, 0))
 end
 
-function pairwise!(r::Array, dist::Euclidean, a::Matrix)
-	pairwise!(r, SqEuclidean(), a, b)
+function pairwise!(r::Matrix, dist::Euclidean, a::Matrix)
+	pairwise!(r, SqEuclidean(), a)
 	@devec r[:] = sqrt(max(r, 0))
 end
 
@@ -305,7 +302,7 @@ function colwise!(r::Array, dist::Cityblock, a::Vector, b::Matrix)
 	end
 end
 
-function pairwise!(r::Array, dist::Cityblock, a::Matrix, b::Matrix)
+function pairwise!(r::Matrix, dist::Cityblock, a::Matrix, b::Matrix)
 	m = size(a, 2)
 	n = size(b, 2)
 	for j = 1 : n
@@ -315,9 +312,8 @@ function pairwise!(r::Array, dist::Cityblock, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Array, dist::Cityblock, a::Matrix)
-	m = size(a, 2)
-	n = size(b, 2)
+function pairwise!(r::Matrix, dist::Cityblock, a::Matrix)
+	n = size(a, 2)
 	for j = 1 : n
 		for i = 1 : j-1
 			r[i,j] = r[j,i]
@@ -340,7 +336,7 @@ end
 chebyshev(a::Vector, b::Vector) = evaluate(Chebyshev(), a, b)
 
 function colwise!(r::Array, dist::Chebyshev, a::Matrix, b::Matrix)
-	@devec r[:] = max(abs(a - b), 1)
+	@devec r[:] = max(abs(a - b), (), 1)
 end
 
 function colwise!(r::Array, dist::Chebyshev, a::Vector, b::Matrix)
@@ -349,7 +345,7 @@ function colwise!(r::Array, dist::Chebyshev, a::Vector, b::Matrix)
 	end
 end
 
-function pairwise!(r::Array, dist::Chebyshev, a::Matrix, b::Matrix)
+function pairwise!(r::Matrix, dist::Chebyshev, a::Matrix, b::Matrix)
 	m = size(a, 2)
 	n = size(b, 2)
 	for j = 1 : n
@@ -359,9 +355,8 @@ function pairwise!(r::Array, dist::Chebyshev, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Array, dist::Chebyshev, a::Matrix)
-	m = size(a, 2)
-	n = size(b, 2)
+function pairwise!(r::Matrix, dist::Chebyshev, a::Matrix)
+	n = size(a, 2)
 	for j = 1 : n
 		for i = 1 : j-1
 			r[i,j] = r[j,i]
@@ -400,7 +395,7 @@ function colwise!(r::Array, dist::Minkowski, a::Vector, b::Matrix)
 	end
 end
 
-function pairwise!(r::Array, dist::Minkowski, a::Matrix, b::Matrix)
+function pairwise!(r::Matrix, dist::Minkowski, a::Matrix, b::Matrix)
 	m = size(a, 2)
 	n = size(b, 2)
 	p = dist.p
@@ -414,9 +409,8 @@ function pairwise!(r::Array, dist::Minkowski, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Array, dist::Minkowski, a::Matrix)
-	m = size(a, 2)
-	n = size(b, 2)
+function pairwise!(r::Matrix, dist::Minkowski, a::Matrix)
+	n = size(a, 2)
 	p = dist.p
 	inv_p = 1 / p
 
@@ -426,12 +420,181 @@ function pairwise!(r::Array, dist::Minkowski, a::Matrix)
 		end
 		r[j,j] = 0
 		for i = j+1 : n
-			@devec t = sum(abs(a[:,i] - b[:,j]) .^ p)
+			@devec t = sum(abs(a[:,i] - a[:,j]) .^ p)
 			r[i,j] = t ^ inv_p
 		end
 	end
 end
 
+
+# Hamming
+
+function evaluate(dist::Hamming, a::Vector, b::Vector)
+	sum(a .!= b)
+end
+
+hamming(a::Vector, b::Vector) = evaluate(Hamming(), a, b)
+
+function colwise!(r::Array, dist::Hamming, a::Matrix, b::Matrix)
+	m, n = size(a)
+	if size(b) != (m, n)
+		throw(ArgumentError("The sizes of a and b must match."))
+	end
+	
+	for j = 1 : n
+		d::Int = 0
+		for i = 1 : m
+			if (a[i,j] != b[i,j]) 
+				d += 1
+			end
+		end
+		r[j] = d
+	end
+end
+
+function colwise!(r::Array, dist::Hamming, a::Vector, b::Matrix)
+	m, n = size(b)
+	for j = 1 : n
+		d::Int = 0
+		for i = 1 : m
+			if (a[i] != b[i,j]) 
+				d += 1
+			end
+		end
+		r[j] = d
+	end
+end
+
+function pairwise!(r::Matrix, dist::Hamming, a::Matrix, b::Matrix)
+	m, na = size(a)
+	nb = size(b, 2)
+	for j = 1 : nb
+		for i = 1 : na
+			d::Int = 0
+			for k = 1 : m
+				if a[k,i] != b[k,j]
+					d += 1
+				end	
+			end
+			r[i,j] = d
+		end
+	end
+end
+
+function pairwise!(r::Matrix, dist::Hamming, a::Matrix)
+	m, n = size(a)
+	for j = 1 : n
+		for i = 1 : j-1
+			r[i,j] = r[j,i]
+		end
+		r[j,j] = 0
+		for i = j+1 : n
+			d::Int = 0
+			for k = 1 : m
+				if a[k,i] != a[k,j]
+					d += 1
+				end
+			end
+			r[i,j] = d
+		end
+	end
+end
+
+
+# Cosine dist
+
+function evaluate(dist::CosineDist, a::Vector, b::Vector)
+	max(1 - dot(a, b) / (norm(a) * norm(b)), 0)
+end
+
+cosine_dist(a::Vector, b::Vector) = evaluate(CosineDist(), a, b)
+
+function colwise!(r::Array, dist::CosineDist, a::Matrix, b::Matrix)
+	@devec begin
+		ra = sum(sqr(a), 1)
+		rb = sum(sqr(b), 1)
+		ra[:] = sqrt(ra)
+		rb[:] = sqrt(rb)
+		ab = sum(a .* b, 1)
+		r[:] = max(1 - ab ./ (ra .* rb), 0)
+	end
+end
+
+function colwise!(r::Array, dist::CosineDist, a::Vector, b::Matrix)
+	@devec begin
+		ra = sqrt(sum(sqr(a)))
+		rb = sum(sqr(b), 1)
+		rb[:] = sqrt(rb)
+	end
+	ab = At_mul_B(b, a)
+	@devec r[:] = max(1 - ab ./ (ra .* rb), 0)
+end
+
+function pairwise!(r::Matrix, dist::CosineDist, a::Matrix, b::Matrix)
+	At_mul_B(r, a, b)
+	@devec begin
+		ra = sum(sqr(a), 1)
+		rb = sum(sqr(b), 1)
+		ra[:] = sqrt(ra)
+		rb[:] = sqrt(rb)
+	end
+	m = size(a, 2)
+	n = size(b, 2)
+	for j = 1 : n
+		for i = 1 : m
+			r[i,j] = max(1 - r[i,j] / (ra[i] * rb[j]), 0)
+		end
+	end
+end
+
+function pairwise!(r::Matrix, dist::CosineDist, a::Matrix)
+	At_mul_B(r, a, a)
+	@devec begin
+		ra = sum(sqr(a), 1)
+		ra[:] = sqrt(ra)
+	end
+	n = size(a, 2)
+	for j = 1 : n
+		for i = 1 : j-1
+			r[i,j] = r[j,i]
+		end
+		r[j,j] = 0
+		for i = j+1 : n
+			r[i,j] = max(1 - r[i,j] / (ra[i] * ra[j]), 0)
+		end
+	end
+end
+
+# Correlation Dist
+
+function evaluate(dist::CorrDist, a::Vector, b::Vector)
+	cosine_dist(a - mean(a), b - mean(b))
+end
+
+corr_dist(a::Vector, b::Vector) = evaluate(CorrDist(), a, b)
+
+function colwise!(r::Array, dist::CorrDist, a::Matrix, b::Matrix)
+	a_ = bsxfun(-, a, mean(a, 1))
+	b_ = bsxfun(-, b, mean(b, 1))
+	colwise!(r, CosineDist(), a_, b_)
+end
+
+function colwise!(r::Array, dist::CorrDist, a::Vector, b::Matrix)
+	a_ = a - mean(a)
+	b_ = bsxfun(-, b, mean(b, 1))
+	colwise!(r, CosineDist(), a_, b_)
+end
+
+function pairwise!(r::Matrix, dist::CorrDist, a::Matrix, b::Matrix)
+	a_ = bsxfun(-, a, mean(a, 1))
+	b_ = bsxfun(-, b, mean(b, 1))
+	pairwise!(r, CosineDist(), a_, b_)
+end
+
+function pairwise!(r::Matrix, dist::CorrDist, a::Matrix)
+	a_ = bsxfun(-, a, mean(a, 1))
+	pairwise!(r, CosineDist(), a_)
+end
 
 
 end # module end
