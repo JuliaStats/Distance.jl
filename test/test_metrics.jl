@@ -56,6 +56,11 @@ for i = 1 : length(p)
 end
 @test is_approx(kl_divergence(p, q), klv, 1.0e-14)
 
+pm = (p + q) / 2
+jsv = kl_divergence(p, pm) / 2 + kl_divergence(q, pm) / 2
+@test is_approx(js_divergence(p, p), 0., 1.0e-14)
+@test is_approx(js_divergence(p, q), jsv, 1.0e-14)
+
 
 # test column-wise metrics
 
@@ -98,7 +103,8 @@ end
 @test_colwise CorrDist() X Y 1.0e-14
 
 @test_colwise ChiSqDist() X Y 1.0e-14
-@test_colwise KLDivergence() P Q 1.0e-14
+@test_colwise KLDivergence() P Q 1.0e-13
+@test_colwise JSDivergence() P Q 1.0e-13
 
 
 # test pairwise metrics
@@ -126,8 +132,6 @@ macro test_pairwise(dist, x, y, tol)
 		for j = 1 : nx, i = 1 : nx
 			rxx[i, j] = evaluate($dist, ($x)[:,i], ($x)[:,j])
 		end
-		@test all_approx(pairwise($dist, $x, $y), rxy, $tol)
-		@test all_approx(pairwise($dist, $x), rxx, $tol)
 	end
 end
 
@@ -142,6 +146,6 @@ end
 @test_pairwise CorrDist() X Y 1.0e-14
 
 @test_pairwise ChiSqDist() X Y 1.0e-14
-@test_pairwise KLDivergence() P Q 1.0e-14
-
+@test_pairwise KLDivergence() P Q 1.0e-13
+@test_pairwise JSDivergence() P Q 1.0e-13
 

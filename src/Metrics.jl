@@ -729,6 +729,111 @@ end
 
 # JS divergence
 
+function evaluate(dist::JSDivergence, a::Vector, b::Vector)
+	r = zero(promote_type(eltype(a), eltype(b)))
+	n = length(a)
+	if n != length(b)
+		throw(ArgumentError("The lengths of a and b must match."))
+	end
+	for i = 1 : n
+		u = (a[i] + b[i]) / 2
+		ta = a[i] > 0 ? a[i] * log(a[i]) / 2 : 0
+		tb = b[i] > 0 ? b[i] * log(b[i]) / 2: 0
+		tu = u > 0 ? u * log(u) : 0
+		r += (ta + tb - tu)
+	end
+	return r
+end
+
+js_divergence(a::Vector, b::Vector) = evaluate(JSDivergence(), a, b)
+
+function colwise!(r::Array, dist::JSDivergence, a::Matrix, b::Matrix)
+	T = zero(promote_type(eltype(a), eltype(b)))
+	if !(size(a) == size(b))
+		throw(ArgumentError("The sizes of a and b must match."))
+	end
+	m, n = size(a)
+	for j = 1 : n
+		s = zero(T)
+		for i = 1 : m
+			u = (a[i,j] + b[i,j]) / 2
+			ta = a[i,j] > 0 ? a[i,j] * log(a[i,j]) / 2 : 0
+			tb = b[i,j] > 0 ? b[i,j] * log(b[i,j]) / 2: 0
+			tu = u > 0 ? u * log(u) : 0
+			s += (ta + tb - tu)
+		end
+		r[j] = s
+	end
+end
+
+function colwise!(r::Array, dist::JSDivergence, a::Vector, b::Matrix)
+	T = zero(promote_type(eltype(a), eltype(b)))
+	if !(length(a) == size(b, 1))
+		throw(ArgumentError("Mismatch dimensions between a and b"))
+	end
+	m, n = size(b)
+	for j = 1 : n
+		s = zero(T)
+		for i = 1 : m
+			u = (a[i] + b[i,j]) / 2
+			ta = a[i] > 0 ? a[i] * log(a[i]) / 2 : 0
+			tb = b[i,j] > 0 ? b[i,j] * log(b[i,j]) / 2: 0
+			tu = u > 0 ? u * log(u) : 0
+			s += (ta + tb - tu)
+		end
+		r[j] = s
+	end
+end
+
+function pairwise!(r::Matrix, dist::JSDivergence, a::Matrix, b::Matrix)
+	T = zero(promote_type(eltype(a), eltype(b)))
+	na = size(a, 2)
+	nb = size(b, 2)
+	if size(a, 1) != size(b, 1)
+		throw(ArgumentError("Mismatch dimensions between a and b"))
+	end
+	m = size(a, 1)
+	for j = 1 : nb
+		for i = 1 : na
+			s = zero(T)
+			for k = 1 : m
+				if a[k,i] > 0
+					u = (a[k,i] + b[k,j]) / 2
+					ta = a[k,i] > 0 ? a[k,i] * log(a[k,i]) / 2 : 0
+					tb = b[k,j] > 0 ? b[k,j] * log(b[k,j]) / 2: 0
+					tu = u > 0 ? u * log(u) : 0
+					s += (ta + tb - tu)	
+				end
+			end
+			r[i,j] = s
+		end
+	end
+end
+
+function pairwise!(r::Matrix, dist::JSDivergence, a::Matrix)
+	T = eltype(a)
+	m, n = size(a)
+	for j = 1 : n
+		for i = 1 : j-1
+			r[i,j] = r[j,i]
+		end
+		r[j,j] = 0
+		for i = j+1 : n
+			s = zero(T)
+			for k = 1 : m
+				if a[k,i] > 0
+					u = (a[k,i] + a[k,j]) / 2
+					ta = a[k,i] > 0 ? a[k,i] * log(a[k,i]) / 2 : 0
+					tb = a[k,j] > 0 ? a[k,j] * log(a[k,j]) / 2 : 0
+					tu = u > 0 ? u * log(u) : 0
+					s += (ta + tb - tu)	
+				end
+			end
+			r[i,j] = s
+		end
+	end
+end
+
 
 end # module end
 	
