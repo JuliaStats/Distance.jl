@@ -41,6 +41,10 @@ b = [1., 3., 0., 2., 2., 0.]
 @test is_approx(corr_dist(x, x), 0., 1.0e-14)
 @test corr_dist(x, y) == cosine_dist(x - mean(x), y - mean(y))
 
+@test chisq_dist(x, x) == 0.
+@test chisq_dist(x, y) == sum((x - y).^2 ./ (x + y))
+
+
 # test column-wise metrics
 
 m = 5
@@ -76,6 +80,8 @@ end
 
 @test_colwise CosineDist() X Y 1.0e-14
 @test_colwise CorrDist() X Y 1.0e-14
+
+@test_colwise ChiSqDist() X Y 1.0e-14
 
 
 # test pairwise metrics
@@ -116,4 +122,7 @@ end
 
 @test_pairwise CosineDist() X Y 1.0e-14 
 @test_pairwise CorrDist() X Y 1.0e-14
+
+@test_pairwise ChiSqDist() X Y 1.0e-14
+
 

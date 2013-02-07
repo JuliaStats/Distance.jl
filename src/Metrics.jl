@@ -16,6 +16,7 @@ export
 	Hamming,
 	CosineDist,
 	CorrDist,
+	ChiSqDist,
 	KLDivergence,
 	JSDivergence,
 	
@@ -28,6 +29,7 @@ export
 	hamming,
 	cosine_dist,
 	corr_dist,
+	chisq_dist,
 	kl_divergence,
 	js_divergence,
 
@@ -77,8 +79,11 @@ end
 type Hamming <: Metric end
 type CosineDist <: SemiMetric end
 type CorrDist <: SemiMetric end
+	
+type ChiSqDist <: SemiMetric end
 type KLDivergence <: PreMetric end
 type JSDivergence <: SemiMetric end
+	
 
 
 ###########################################################
@@ -320,7 +325,7 @@ function pairwise!(r::Matrix, dist::Cityblock, a::Matrix)
 		end
 		r[j,j] = 0
 		for i = j+1 : n
-			r[i,j] = sum(abs(a[:,i] - a[:,j]))
+			@devec r[i,j] = sum(abs(a[:,i] - a[:,j]))
 		end
 	end
 end
@@ -363,7 +368,7 @@ function pairwise!(r::Matrix, dist::Chebyshev, a::Matrix)
 		end
 		r[j,j] = 0
 		for i = j+1 : n
-			r[i,j] = max(abs(a[:,i] - a[:,j]))
+			@devec r[i,j] = max(abs(a[:,i] - a[:,j]))
 		end
 	end
 end
@@ -594,6 +599,49 @@ end
 function pairwise!(r::Matrix, dist::CorrDist, a::Matrix)
 	a_ = bsxfun(-, a, mean(a, 1))
 	pairwise!(r, CosineDist(), a_)
+end
+
+
+# Chi-square distance
+
+function evaluate(dist::ChiSqDist, a::Vector, b::Vector)
+	@devec r = sum(sqr(a - b) ./ (a + b))
+	return r
+end
+
+chisq_dist(a::Vector, b::Vector) = evaluate(ChiSqDist(), a, b)
+
+function colwise!(r::Array, dist::ChiSqDist, a::Matrix, b::Matrix)
+	@devec r[:] = sum(sqr(a - b) ./ (a + b), 1)
+end
+
+function colwise!(r::Array, dist::ChiSqDist, a::Vector, b::Matrix)
+	for j = 1 : size(b, 2)
+		@devec r[j] = sum(sqr(a - b[:,j]) ./ (a + b[:,j]))
+	end
+end
+
+function pairwise!(r::Matrix, dist::ChiSqDist, a::Matrix, b::Matrix)
+	m = size(a, 2)
+	n = size(b, 2)
+	for j = 1 : n
+		for i = 1 : m
+			@devec r[i,j] = sum(sqr(a[:,i] - b[:,j]) ./ (a[:,i] + b[:,j]))
+		end
+	end
+end
+
+function pairwise!(r::Matrix, dist::ChiSqDist, a::Matrix)
+	n = size(a, 2)
+	for j = 1 : n
+		for i = 1 : j-1
+			r[i,j] = r[j,i]
+		end
+		r[j,j] = 0
+		for i = j+1 : n
+			@devec r[i,j] = sum(sqr(a[:,i] - a[:,j]) ./ (a[:,i] + a[:,j]))
+		end
+	end
 end
 
 
