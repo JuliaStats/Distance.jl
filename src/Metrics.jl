@@ -13,6 +13,8 @@ export
 	Chebyshev,
 	Cityblock,
 	Minkowski,
+	Mahalanobis,
+	
 	Hamming,
 	CosineDist,
 	CorrDist,
@@ -26,6 +28,8 @@ export
 	chebyshev,
 	cityblock,
 	minkowski,
+	mahalanobis,
+	
 	hamming,
 	cosine_dist,
 	corr_dist,
@@ -98,12 +102,85 @@ result_type(::Hamming, T1::Type, T2::Type) = Int
 
 ###########################################################
 #
+#	helper functions for dimension checking
+#
+###########################################################
+
+function get_common_ncols(a::Matrix, b::Matrix)
+	na = size(a, 2)
+	nb = size(b, 2)
+	if na != nb
+		throw(ArgumentError("The number of columns in a and b must match."))
+	end
+	return na
+end
+
+# the following functions are supposed to be used in inplace-functions
+# and they only apply to cases where vector dimensions are the same
+
+function get_colwise_dims(r::Array, a::Matrix, b::Matrix)
+	if !(size(a) == size(b))
+		throw(ArgumentError("The sizes of a and b must match."))
+	end
+	if length(r) != size(a, 2)
+		throw(ArgumentError("Invalid size of r."))
+	end
+	return size(a)
+end
+
+function get_colwise_dims(r::Array, a::Vector, b::Matrix)
+	if length(a) != size(b, 1)
+		throw(ArgumentError("The length of a must match the number of rows in b."))
+	end
+	if length(r) != size(b, 2)
+		throw(ArgumentError("Invalid size of r."))
+	end
+	return size(b)
+end
+
+function get_colwise_dims(r::Array, a::Matrix, b::Vector)
+	if !(size(a, 1) == length(b))
+		throw(ArgumentError("The length of b must match the number of rows in a."))
+	end
+	if length(r) != size(a, 2)
+		throw(ArgumentError("Invalid size of r."))
+	end
+	return size(a)
+end
+
+function get_pairwise_dims(r::Matrix, a::Matrix, b::Matrix)
+	ma, na = size(a)
+	mb, nb = size(b)
+	if ma != mb
+		throw(ArgumentError("The numbers of rows in a and b must match."))
+	end
+	if !(size(r) == (na, nb))
+		throw(ArgumentError("Invalid size of r."))
+	end
+	return (ma, na, nb)
+end
+
+function get_pairwise_dims(r::Matrix, a::Matrix)
+	m, n = size(a)
+	if !(size(r) == (n, n))
+		throw(ArgumentError("Invalid size of r."))
+	end
+	return (m, n)
+end
+
+
+
+###########################################################
+#
 #	Generic colwise and pairwise evaluation
 #
 ###########################################################
 
 function colwise!(r::Array, metric::PreMetric, a::Vector, b::Matrix)
 	n = size(b, 2)
+	if length(r) != n
+		throw(ArgumentError("Incorrect size of r."))
+	end
 	for j = 1 : n
 		r[j] = evaluate(metric, a, b[:,j])
 	end
@@ -111,14 +188,19 @@ end
 
 function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Vector)
 	n = size(a, 2)
+	if length(r) != n
+		throw(ArgumentError("Incorrect size of r."))
+	end
 	for j = 1 : n
 		r[j] = evaluate(metric, a[:,j], b)
 	end
 end
 
 function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Matrix)
-	n = size(a, 2)
-	@assert n == size(b, 2)
+	n = get_common_ncols(a, b)
+	if length(r) != n
+		throw(ArgumentError("Incorrect size of r."))
+	end
 	for j = 1 : n
 		r[j] = evaluate(metric, a[:,j], b[:,j])
 	end
@@ -129,11 +211,7 @@ function colwise!(r::Array, metric::SemiMetric, a::Matrix, b::Vector)
 end
 
 function colwise(metric::PreMetric, a::Matrix, b::Matrix)
-	n = size(a, 2)
-	if size(b, 2) != n
-		throw(ArgumentError("The number of columns of a and b must match."))
-	end
-
+	n = get_common_ncols(a, b)
 	r = Array(result_type(metric, eltype(a), eltype(b)), n)
 	colwise!(r, metric, a, b)
 	return r
@@ -155,6 +233,11 @@ end
 
 
 function pairwise!(r::Matrix, metric::PreMetric, a::Matrix, b::Matrix)
+	na = size(a, 2)
+	nb = size(b, 2)
+	if !(size(r) == (na, nb))
+		throw(ArgumentError("Incorrect size of r."))
+	end
 	for j = 1 : size(b, 2)
 		bj = b[:,j]
 		for i = 1 : size(a, 2)
@@ -171,6 +254,9 @@ end
 # faster evaluation by leveraging the properties of semi-metrics
 function pairwise!(r::Matrix, metric::SemiMetric, a::Matrix)
 	n = size(a, 2)
+	if !(size(r) == (n, n))
+		throw(ArgumentError("Incorrect size of r."))
+	end
 	for j = 1 : n
 		for i = 1 : j-1
 			a[i,j] = a[j,i]
@@ -271,22 +357,26 @@ end
 euclidean(a::Vector, b::Vector) = evaluate(Euclidean(), a, b)
 
 function colwise!(r::Array, dist::Euclidean, a::Matrix, b::Matrix)
+	get_colwise_dims(r, a, b)
 	@devec r[:] = sqrt(sum(sqr(a - b), 1))
 end
 
 function colwise!(r::Array, dist::Euclidean, a::Vector, b::Matrix)
-	for j = 1 : size(b, 2)
+	m, n = get_colwise_dims(r, a, b)
+	for j = 1 : n
 		@devec r[j] = sum(sqr(a - b[:,j]))
 		r[j] = sqrt(r[j])
 	end
 end
 
 function pairwise!(r::Matrix, dist::Euclidean, a::Matrix, b::Matrix)
+	get_pairwise_dims(r, a, b)
 	pairwise!(r, SqEuclidean(), a, b)
 	@devec r[:] = sqrt(max(r, 0))
 end
 
 function pairwise!(r::Matrix, dist::Euclidean, a::Matrix)
+	get_pairwise_dims(r, a)
 	pairwise!(r, SqEuclidean(), a)
 	@devec r[:] = sqrt(max(r, 0))
 end
@@ -302,27 +392,28 @@ end
 cityblock(a::Vector, b::Vector) = evaluate(Cityblock(), a, b)
 
 function colwise!(r::Array, dist::Cityblock, a::Matrix, b::Matrix)
+	get_colwise_dims(r, a, b)
 	@devec r[:] = sum(abs(a - b), 1)
 end
 
 function colwise!(r::Array, dist::Cityblock, a::Vector, b::Matrix)
-	for j = 1 : size(b, 2)
+	m, n = get_colwise_dims(r, a, b)
+	for j = 1 : n
 		@devec r[j] = sum(abs(a - b[:,j]))
 	end
 end
 
 function pairwise!(r::Matrix, dist::Cityblock, a::Matrix, b::Matrix)
-	m = size(a, 2)
-	n = size(b, 2)
-	for j = 1 : n
-		for i = 1 : m
+	m, na, nb = get_pairwise_dims(r, a, b)
+	for j = 1 : nb
+		for i = 1 : na
 			@devec r[i,j] = sum(abs(a[:,i] - b[:,j]))
 		end
 	end
 end
 
 function pairwise!(r::Matrix, dist::Cityblock, a::Matrix)
-	n = size(a, 2)
+	m, n = get_pairwise_dims(r, a)
 	for j = 1 : n
 		for i = 1 : j-1
 			r[i,j] = r[j,i]
@@ -345,27 +436,28 @@ end
 chebyshev(a::Vector, b::Vector) = evaluate(Chebyshev(), a, b)
 
 function colwise!(r::Array, dist::Chebyshev, a::Matrix, b::Matrix)
+	get_colwise_dims(r, a, b)
 	@devec r[:] = max(abs(a - b), (), 1)
 end
 
 function colwise!(r::Array, dist::Chebyshev, a::Vector, b::Matrix)
+	get_colwise_dims(r, a, b)
 	for j = 1 : size(b, 2)
 		@devec r[j] = max(abs(a - b[:,j]))
 	end
 end
 
 function pairwise!(r::Matrix, dist::Chebyshev, a::Matrix, b::Matrix)
-	m = size(a, 2)
-	n = size(b, 2)
-	for j = 1 : n
-		for i = 1 : m
+	m, na, nb = get_pairwise_dims(r, a, b)
+	for j = 1 : nb
+		for i = 1 : na
 			@devec r[i,j] = max(abs(a[:,i] - b[:,j]))
 		end
 	end
 end
 
 function pairwise!(r::Matrix, dist::Chebyshev, a::Matrix)
-	n = size(a, 2)
+	m, n = get_pairwise_dims(r, a)
 	for j = 1 : n
 		for i = 1 : j-1
 			r[i,j] = r[j,i]
@@ -389,29 +481,30 @@ end
 minkowski(a::Vector, b::Vector, p::Real) = evaluate(Minkowski(p), a, b)
 
 function colwise!(r::Array, dist::Minkowski, a::Matrix, b::Matrix)
+	get_colwise_dims(r, a, b)
 	p = dist.p
 	inv_p = 1 / p
 	@devec r[:] = sum(abs(a - b) .^ p, 1) .^ inv_p
 end
 
 function colwise!(r::Array, dist::Minkowski, a::Vector, b::Matrix)
+	m, n = get_colwise_dims(r, a, b)
 	p = dist.p
 	inv_p = 1 / p
 
-	for j = 1 : size(b, 2)
+	for j = 1 : n
 		@devec r[j] = sum(abs(a - b[:,j]) .^ p)
 		r[j] = r[j] ^ inv_p
 	end
 end
 
 function pairwise!(r::Matrix, dist::Minkowski, a::Matrix, b::Matrix)
-	m = size(a, 2)
-	n = size(b, 2)
+	m, na, nb = get_pairwise_dims(r, a, b)
 	p = dist.p
 	inv_p = 1 / p
 
-	for j = 1 : n
-		for i = 1 : m
+	for j = 1 : nb
+		for i = 1 : na
 			@devec t = sum(abs(a[:,i] - b[:,j]) .^ p)
 			r[i,j] = t ^ inv_p
 		end
@@ -419,7 +512,7 @@ function pairwise!(r::Matrix, dist::Minkowski, a::Matrix, b::Matrix)
 end
 
 function pairwise!(r::Matrix, dist::Minkowski, a::Matrix)
-	n = size(a, 2)
+	m, n = get_pairwise_dims(r, a)
 	p = dist.p
 	inv_p = 1 / p
 
@@ -445,11 +538,7 @@ end
 hamming(a::Vector, b::Vector) = evaluate(Hamming(), a, b)
 
 function colwise!(r::Array, dist::Hamming, a::Matrix, b::Matrix)
-	m, n = size(a)
-	if size(b) != (m, n)
-		throw(ArgumentError("The sizes of a and b must match."))
-	end
-	
+	m, n = get_colwise_dims(r, a, b)
 	for j = 1 : n
 		d::Int = 0
 		for i = 1 : m
@@ -462,7 +551,7 @@ function colwise!(r::Array, dist::Hamming, a::Matrix, b::Matrix)
 end
 
 function colwise!(r::Array, dist::Hamming, a::Vector, b::Matrix)
-	m, n = size(b)
+	m, n = get_colwise_dims(r, a, b)
 	for j = 1 : n
 		d::Int = 0
 		for i = 1 : m
@@ -475,8 +564,7 @@ function colwise!(r::Array, dist::Hamming, a::Vector, b::Matrix)
 end
 
 function pairwise!(r::Matrix, dist::Hamming, a::Matrix, b::Matrix)
-	m, na = size(a)
-	nb = size(b, 2)
+	m, na, nb = get_pairwise_dims(r, a, b)
 	for j = 1 : nb
 		for i = 1 : na
 			d::Int = 0
@@ -491,7 +579,7 @@ function pairwise!(r::Matrix, dist::Hamming, a::Matrix, b::Matrix)
 end
 
 function pairwise!(r::Matrix, dist::Hamming, a::Matrix)
-	m, n = size(a)
+	m, n = get_pairwise_dims(r, a)
 	for j = 1 : n
 		for i = 1 : j-1
 			r[i,j] = r[j,i]
@@ -519,6 +607,7 @@ end
 cosine_dist(a::Vector, b::Vector) = evaluate(CosineDist(), a, b)
 
 function colwise!(r::Array, dist::CosineDist, a::Matrix, b::Matrix)
+	get_colwise_dims(r, a, b)
 	@devec begin
 		ra = sum(sqr(a), 1)
 		rb = sum(sqr(b), 1)
@@ -530,6 +619,7 @@ function colwise!(r::Array, dist::CosineDist, a::Matrix, b::Matrix)
 end
 
 function colwise!(r::Array, dist::CosineDist, a::Vector, b::Matrix)
+	get_colwise_dims(r, a, b)
 	@devec begin
 		ra = sqrt(sum(sqr(a)))
 		rb = sum(sqr(b), 1)
@@ -540,6 +630,7 @@ function colwise!(r::Array, dist::CosineDist, a::Vector, b::Matrix)
 end
 
 function pairwise!(r::Matrix, dist::CosineDist, a::Matrix, b::Matrix)
+	m, na, nb = get_pairwise_dims(r, a, b)
 	At_mul_B(r, a, b)
 	@devec begin
 		ra = sum(sqr(a), 1)
@@ -547,22 +638,20 @@ function pairwise!(r::Matrix, dist::CosineDist, a::Matrix, b::Matrix)
 		ra[:] = sqrt(ra)
 		rb[:] = sqrt(rb)
 	end
-	m = size(a, 2)
-	n = size(b, 2)
-	for j = 1 : n
-		for i = 1 : m
+	for j = 1 : nb
+		for i = 1 : na
 			r[i,j] = max(1 - r[i,j] / (ra[i] * rb[j]), 0)
 		end
 	end
 end
 
 function pairwise!(r::Matrix, dist::CosineDist, a::Matrix)
+	m, n = get_pairwise_dims(r, a)
 	At_mul_B(r, a, a)
 	@devec begin
 		ra = sum(sqr(a), 1)
 		ra[:] = sqrt(ra)
 	end
-	n = size(a, 2)
 	for j = 1 : n
 		for i = 1 : j-1
 			r[i,j] = r[j,i]
@@ -616,27 +705,30 @@ end
 chisq_dist(a::Vector, b::Vector) = evaluate(ChiSqDist(), a, b)
 
 function colwise!(r::Array, dist::ChiSqDist, a::Matrix, b::Matrix)
+	get_colwise_dims(r, a, b)
 	@devec r[:] = sum(sqr(a - b) ./ (a + b), 1)
 end
 
 function colwise!(r::Array, dist::ChiSqDist, a::Vector, b::Matrix)
+	get_colwise_dims(r, a, b)
 	for j = 1 : size(b, 2)
 		@devec r[j] = sum(sqr(a - b[:,j]) ./ (a + b[:,j]))
 	end
 end
 
 function pairwise!(r::Matrix, dist::ChiSqDist, a::Matrix, b::Matrix)
+	m, na, nb = get_pairwise_dims(r, a, b)
 	m = size(a, 2)
 	n = size(b, 2)
-	for j = 1 : n
-		for i = 1 : m
+	for j = 1 : nb
+		for i = 1 : na
 			@devec r[i,j] = sum(sqr(a[:,i] - b[:,j]) ./ (a[:,i] + b[:,j]))
 		end
 	end
 end
 
 function pairwise!(r::Matrix, dist::ChiSqDist, a::Matrix)
-	n = size(a, 2)
+	m, n = get_pairwise_dims(r, a)
 	for j = 1 : n
 		for i = 1 : j-1
 			r[i,j] = r[j,i]
@@ -668,11 +760,8 @@ end
 kl_divergence(a::Vector, b::Vector) = evaluate(KLDivergence(), a, b)
 
 function colwise!(r::Array, dist::KLDivergence, a::Matrix, b::Matrix)
+	m, n = get_colwise_dims(r, a, b)
 	T = zero(promote_type(eltype(a), eltype(b)))
-	if !(size(a) == size(b))
-		throw(ArgumentError("The sizes of a and b must match."))
-	end
-	m, n = size(a)
 	for j = 1 : n
 		s = zero(T)
 		for i = 1 : m
@@ -685,11 +774,8 @@ function colwise!(r::Array, dist::KLDivergence, a::Matrix, b::Matrix)
 end
 
 function colwise!(r::Array, dist::KLDivergence, a::Vector, b::Matrix)
+	m, n = get_colwise_dims(r, a, b)
 	T = zero(promote_type(eltype(a), eltype(b)))
-	if !(length(a) == size(b, 1))
-		throw(ArgumentError("Mismatch dimensions between a and b"))
-	end
-	m, n = size(b)
 	for j = 1 : n
 		s = zero(T)
 		for i = 1 : m
@@ -701,14 +787,25 @@ function colwise!(r::Array, dist::KLDivergence, a::Vector, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::KLDivergence, a::Matrix, b::Matrix)
+
+function colwise!(r::Array, dist::KLDivergence, a::Matrix, b::Vector)
+	m, n = get_colwise_dims(r, a, b)
 	T = zero(promote_type(eltype(a), eltype(b)))
-	na = size(a, 2)
-	nb = size(b, 2)
-	if size(a, 1) != size(b, 1)
-		throw(ArgumentError("Mismatch dimensions between a and b"))
+	for j = 1 : n
+		s = zero(T)
+		for i = 1 : m
+			if a[i,j] > 0
+				s += a[i,j] * log(a[i,j] / b[i])
+			end
+		end
+		r[j] = s
 	end
-	m = size(a, 1)
+end
+
+
+function pairwise!(r::Matrix, dist::KLDivergence, a::Matrix, b::Matrix)
+	m, na, nb = get_pairwise_dims(r, a, b)
+	T = zero(promote_type(eltype(a), eltype(b)))
 	for j = 1 : nb
 		for i = 1 : na
 			s = zero(T)
@@ -748,11 +845,8 @@ end
 js_divergence(a::Vector, b::Vector) = evaluate(JSDivergence(), a, b)
 
 function colwise!(r::Array, dist::JSDivergence, a::Matrix, b::Matrix)
+	m, n = get_colwise_dims(r, a, b)
 	T = zero(promote_type(eltype(a), eltype(b)))
-	if !(size(a) == size(b))
-		throw(ArgumentError("The sizes of a and b must match."))
-	end
-	m, n = size(a)
 	for j = 1 : n
 		s = zero(T)
 		for i = 1 : m
@@ -767,11 +861,8 @@ function colwise!(r::Array, dist::JSDivergence, a::Matrix, b::Matrix)
 end
 
 function colwise!(r::Array, dist::JSDivergence, a::Vector, b::Matrix)
+	m, n = get_colwise_dims(r, a, b)
 	T = zero(promote_type(eltype(a), eltype(b)))
-	if !(length(a) == size(b, 1))
-		throw(ArgumentError("Mismatch dimensions between a and b"))
-	end
-	m, n = size(b)
 	for j = 1 : n
 		s = zero(T)
 		for i = 1 : m
@@ -786,13 +877,8 @@ function colwise!(r::Array, dist::JSDivergence, a::Vector, b::Matrix)
 end
 
 function pairwise!(r::Matrix, dist::JSDivergence, a::Matrix, b::Matrix)
+	m, na, nb = get_pairwise_dims(r, a, b)
 	T = zero(promote_type(eltype(a), eltype(b)))
-	na = size(a, 2)
-	nb = size(b, 2)
-	if size(a, 1) != size(b, 1)
-		throw(ArgumentError("Mismatch dimensions between a and b"))
-	end
-	m = size(a, 1)
 	for j = 1 : nb
 		for i = 1 : na
 			s = zero(T)
@@ -811,8 +897,8 @@ function pairwise!(r::Matrix, dist::JSDivergence, a::Matrix, b::Matrix)
 end
 
 function pairwise!(r::Matrix, dist::JSDivergence, a::Matrix)
+	m, n = get_pairwise_dims(r, a)
 	T = eltype(a)
-	m, n = size(a)
 	for j = 1 : n
 		for i = 1 : j-1
 			r[i,j] = r[j,i]
