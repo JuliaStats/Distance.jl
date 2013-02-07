@@ -103,18 +103,22 @@ result_type(::Hamming, T1::Type, T2::Type) = Int
 ###########################################################
 
 function colwise!(r::Array, metric::PreMetric, a::Vector, b::Matrix)
+	n = size(b, 2)
 	for j = 1 : n
 		r[j] = evaluate(metric, a, b[:,j])
 	end
 end
 
 function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Vector)
+	n = size(a, 2)
 	for j = 1 : n
 		r[j] = evaluate(metric, a[:,j], b)
 	end
 end
 
 function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Matrix)
+	n = size(a, 2)
+	@assert n == size(b, 2)
 	for j = 1 : n
 		r[j] = evaluate(metric, a[:,j], b[:,j])
 	end
@@ -189,7 +193,7 @@ end
 
 function pairwise(metric::PreMetric, a::Matrix)
 	n = size(a, 2)
-	r = Array(result_type(metric, eltype(a), eltype(b)), (n, n))
+	r = Array(result_type(metric, eltype(a), eltype(a)), (n, n))
 	pairwise!(r, metric, a)
 	return r
 end
@@ -643,6 +647,87 @@ function pairwise!(r::Matrix, dist::ChiSqDist, a::Matrix)
 		end
 	end
 end
+
+
+# KL divergence
+
+function evaluate(dist::KLDivergence, a::Vector, b::Vector)
+	r = zero(promote_type(eltype(a), eltype(b)))
+	n = length(a)
+	if n != length(b)
+		throw(ArgumentError("The lengths of a and b must match."))
+	end
+	for i = 1 : n
+		if a[i] > 0
+			r += a[i] * log(a[i] / b[i])
+		end
+	end
+	return r
+end
+
+kl_divergence(a::Vector, b::Vector) = evaluate(KLDivergence(), a, b)
+
+function colwise!(r::Array, dist::KLDivergence, a::Matrix, b::Matrix)
+	T = zero(promote_type(eltype(a), eltype(b)))
+	if !(size(a) == size(b))
+		throw(ArgumentError("The sizes of a and b must match."))
+	end
+	m, n = size(a)
+	for j = 1 : n
+		s = zero(T)
+		for i = 1 : m
+			if a[i,j] > 0
+				s += a[i,j] * log(a[i,j] / b[i,j])
+			end
+		end
+		r[j] = s
+	end
+end
+
+function colwise!(r::Array, dist::KLDivergence, a::Vector, b::Matrix)
+	T = zero(promote_type(eltype(a), eltype(b)))
+	if !(length(a) == size(b, 1))
+		throw(ArgumentError("Mismatch dimensions between a and b"))
+	end
+	m, n = size(b)
+	for j = 1 : n
+		s = zero(T)
+		for i = 1 : m
+			if a[i] > 0
+				s += a[i] * log(a[i] / b[i,j])
+			end
+		end
+		r[j] = s
+	end
+end
+
+function pairwise!(r::Matrix, dist::KLDivergence, a::Matrix, b::Matrix)
+	T = zero(promote_type(eltype(a), eltype(b)))
+	na = size(a, 2)
+	nb = size(b, 2)
+	if size(a, 1) != size(b, 1)
+		throw(ArgumentError("Mismatch dimensions between a and b"))
+	end
+	m = size(a, 1)
+	for j = 1 : nb
+		for i = 1 : na
+			s = zero(T)
+			for k = 1 : m
+				if a[k,i] > 0
+					s += a[k,i] * log(a[k,i] / b[k,j])		
+				end
+			end
+			r[i,j] = s
+		end
+	end
+end
+
+function pairwise!(r::Matrix, dist::KLDivergence, a::Matrix)
+	pairwise!(r, dist, a, a)  # K-L divergence is not symmetric
+end
+
+
+# JS divergence
 
 
 end # module end

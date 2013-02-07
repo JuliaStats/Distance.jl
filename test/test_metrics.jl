@@ -17,6 +17,10 @@ y = [3., 9., 8., 1.]
 a = [1., 2., 1., 3., 2., 1.]
 b = [1., 3., 0., 2., 2., 0.]
 
+p = rand(12)
+p[p .< 0.3] = 0. 
+q = rand(12)
+
 @test sqeuclidean(x, x) == 0.
 @test sqeuclidean(x, y) == 57.
 
@@ -44,6 +48,14 @@ b = [1., 3., 0., 2., 2., 0.]
 @test chisq_dist(x, x) == 0.
 @test chisq_dist(x, y) == sum((x - y).^2 ./ (x + y))
 
+klv = 0.
+for i = 1 : length(p)
+	if p[i] > 0
+		klv += p[i] * log(p[i] / q[i])
+	end
+end
+@test is_approx(kl_divergence(p, q), klv, 1.0e-14)
+
 
 # test column-wise metrics
 
@@ -53,6 +65,10 @@ X = rand(m, n)
 Y = rand(m, n)
 A = rand(1:3, m, n)
 B = rand(1:3, m, n)
+
+P = rand(m, n)
+Q = rand(m, n)
+P[P .< 0.3] = 0.
 
 macro test_colwise(dist, x, y, tol)
 	quote
@@ -82,6 +98,7 @@ end
 @test_colwise CorrDist() X Y 1.0e-14
 
 @test_colwise ChiSqDist() X Y 1.0e-14
+@test_colwise KLDivergence() P Q 1.0e-14
 
 
 # test pairwise metrics
@@ -93,6 +110,9 @@ X = rand(m, nx)
 Y = rand(m, ny)
 A = rand(1:3, m, nx)
 B = rand(1:3, m, ny)
+
+P = rand(m, nx)
+Q = rand(m, ny)
 
 macro test_pairwise(dist, x, y, tol)
 	quote
@@ -106,8 +126,6 @@ macro test_pairwise(dist, x, y, tol)
 		for j = 1 : nx, i = 1 : nx
 			rxx[i, j] = evaluate($dist, ($x)[:,i], ($x)[:,j])
 		end
-		#println("rxy = ", rxy)
-		#println("res = ", pairwise($dist, $x, $y))
 		@test all_approx(pairwise($dist, $x, $y), rxy, $tol)
 		@test all_approx(pairwise($dist, $x), rxx, $tol)
 	end
@@ -124,5 +142,6 @@ end
 @test_pairwise CorrDist() X Y 1.0e-14
 
 @test_pairwise ChiSqDist() X Y 1.0e-14
+@test_pairwise KLDivergence() P Q 1.0e-14
 
 
