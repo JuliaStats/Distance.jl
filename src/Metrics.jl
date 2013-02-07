@@ -121,9 +121,9 @@ type WeightedCityblock{T<:FloatingPoint} <: Metric
 	weights::Vector{T}
 end
 	
-type WeightedMinkowski{T<:FloatingPoint} <: Metric 
-	p::Real
+type WeightedMinkowski{T<:FloatingPoint} <: Metric 	
 	weights::Vector{T}
+	p::Real
 end
 
 type WeightedHamming{T<:FloatingPoint} <: Metric 
@@ -1177,6 +1177,73 @@ function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedCityblock{T}, a::M
 		r[j,j] = 0
 		for i = j+1 : n
 			@devec r[i,j] = sum(abs(a[:,i] - a[:,j]) .* w)
+		end
+	end
+end
+
+
+# WeightedMinkowski
+
+function evaluate{T<:FloatingPoint}(dist::WeightedMinkowski{T}, a::Vector, b::Vector)
+	p = dist.p
+	w = dist.weights
+	@devec r = sum((abs(a - b) .^ p) .* w)
+	return r ^ (1 / p)
+end
+
+weighted_minkowski(a::Vector, b::Vector, w::Vector, p::Real) = evaluate(WeightedMinkowski(w, p), a, b)
+
+function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedMinkowski{T}, a::Matrix, b::Matrix)
+	w = dist.weights
+	m, n = get_colwise_dims(length(w), r, a, b)
+	p = dist.p
+	inv_p = 1 / p
+	for j = 1 : n
+		@devec s = sum((abs(a[:,j] - b[:,j]) .^ p) .* w)
+		r[j] = s ^ inv_p
+	end
+end
+
+function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedMinkowski{T}, a::Vector, b::Matrix)
+	w = dist.weights
+	m, n = get_colwise_dims(length(w), r, a, b)
+	p = dist.p
+	inv_p = 1 / p
+
+	for j = 1 : n
+		@devec s = sum((abs(a - b[:,j]) .^ p) .* w)
+		r[j] = s ^ inv_p
+	end
+end
+
+function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedMinkowski{T}, a::Matrix, b::Matrix)
+	w = dist.weights
+	m, na, nb = get_pairwise_dims(length(w), r, a, b)
+	p = dist.p
+	inv_p = 1 / p
+
+	for j = 1 : nb
+		for i = 1 : na
+			@devec t = sum((abs(a[:,i] - b[:,j]) .^ p) .* w)
+			r[i,j] = t ^ inv_p
+		end
+	end
+end
+
+function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedMinkowski{T}, a::Matrix)
+	w = dist.weights
+	m, n = get_pairwise_dims(r, a)
+	p = dist.p
+	inv_p = 1 / p
+
+	for j = 1 : n
+		for i = 1 : j-1
+			r[i,j] = r[j,i]
+		end
+		r[j,j] = 0
+		for i = j+1 : n
+			@devec t = sum((abs(a[:,i] - a[:,j]) .^ p) .* w)
+			r[i,j] = t ^ inv_p
 		end
 	end
 end
