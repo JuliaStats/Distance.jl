@@ -2,6 +2,11 @@
 
 A Julia package for evaluating distances(metrics) between vectors.
 
+This package also provides carefully optimized functions to compute column-wise and pairwise distances, which is often faster than a straightforward loop implementation by one or two orders of magnitude. (See the benchmark section below for details).
+
+**Dependencies:** [Devectorize.jl](https://github.com/lindahua/Devectorize.jl)
+
+
 ## Supported distances
 
 * Euclidean distance
@@ -144,27 +149,56 @@ Here are the benchmarks that I obtained on Mac OS X 10.8 with Intel Core i7 2.6 
 
 #### Column-wise benchmark
 
-The table below compares the performance (measured in terms of average elaped time of each iteration) of a straightforward loop implementation and an optimized implementation provided in *Distance.jl*. The task in each iteration is to compute a specific distance between corresponding columns in two ``200-by-10000`` matrices.
+The table below compares the performance (measured in terms of average elapsed time of each iteration) of a straightforward loop implementation and an optimized implementation provided in *Distance.jl*. The task in each iteration is to compute a specific distance between corresponding columns in two ``200-by-10000`` matrices.
 
 |  distance   |   loop  |   colwise   |   gain     |
 |------------ | --------| ------------| -----------|
-| SqEuclidean | 0.038312 | 0.004708 | 8.1376
-| Euclidean | 0.036947 | 0.004158 | 8.8853
-| Cityblock | 0.037507 | 0.004348 | 8.6263
-| Chebyshev | 0.045246 | 0.012861 | 3.5179
-| Minkowski | 0.418969 | 0.379957 | 1.1027
-| Hamming | 0.035414 | 0.004264 | 8.3046
-| CosineDist | 0.053191 | 0.008009 | 6.6417
-| CorrDist | 0.085048 | 0.035571 | 2.391
-| ChiSqDist | 0.04407 | 0.00839 | 5.2528
-| KLDivergence | 0.071618 | 0.040244 | 1.7796
-| JSDivergence | 0.45729 | 0.417977 | 1.0941
-| WeightedSqEuclidean | 0.040023 | 0.006049 | 6.6165
-| WeightedEuclidean | 0.039938 | 0.005953 | 6.7094
-| WeightedCityblock | 0.038502 | 0.006362 | 6.0517
-| WeightedMinkowski | 0.540418 | 0.510852 | 1.0579
-| WeightedHamming | 0.039012 | 0.004541 | 8.592
-| SqMahalanobis | 0.135427 | 0.040468 | 3.3465
-| Mahalanobis | 0.135613 | 0.04203 | 3.2266
+| SqEuclidean | 0.038312 | 0.004708 | 8.137x | 
+| Euclidean | 0.036947 | 0.004158 | 8.885x | 
+| Cityblock | 0.037507 | 0.004348 | 8.626x |
+| Chebyshev | 0.045246 | 0.012861 | 3.517x |
+| Minkowski | 0.418969 | 0.379957 | 1.103x |
+| Hamming | 0.035414 | 0.004264 | 8.305x |
+| CosineDist | 0.053191 | 0.008009 | 6.642x |
+| CorrDist | 0.085048 | 0.035571 | 2.391x |
+| ChiSqDist | 0.04407 | 0.00839 | 5.253x |
+| KLDivergence | 0.071618 | 0.040244 | 1.780x |
+| JSDivergence | 0.45729 | 0.417977 | 1.094x |
+| WeightedSqEuclidean | 0.040023 | 0.006049 | 6.617x |
+| WeightedEuclidean | 0.039938 | 0.005953 | 6.710x |
+| WeightedCityblock | 0.038502 | 0.006362 | 6.052x |
+| WeightedMinkowski | 0.540418 | 0.510852 | 1.058x |
+| WeightedHamming | 0.039012 | 0.004541 | 8.592x |
+| SqMahalanobis | 0.135427 | 0.040468 | 3.347x |
+| Mahalanobis | 0.135613 | 0.04203 | 3.227x |
+
+We can see that using ``colwise`` instead of a simple loop yields considerable gain (2x - 9x), especially when the internal computation of each distance is simple. Nonetheless, when the computaton of a single distance is heavy enough (e.g. *Minkowski* and *JSDivergence*), the gain is not as significant.
+
+#### Pairwise benchmark
+
+The table below compares the performance (measured in terms of average elapsed time of each iteration) of a straightforward loop implementation and an optimized implementation provided in *Distance.jl*. The task in each iteration is to compute a specific distance in a pairwise manner between columns in a ``100-by-200`` and ``100-by-250`` matrices, which will result in a ``200-by-250`` distance matrix.
+
+|  distance   |   loop  |   colwise   |   gain     |
+|------------ | --------| ------------| -----------|
+| SqEuclidean | 0.092455 | 0.000459 | **201.31x** |
+| Euclidean | 0.091295 | 0.000734 | **124.36x** |
+| Cityblock | 0.09096 | 0.012827 | 7.0913x |
+| Chebyshev | 0.105589 | 0.033345 | 3.1665x | 
+| Minkowski | 1.015888 | 0.940429 | 1.0802x |
+| Hamming | 0.086808 | 0.010143 | 8.5583x |
+| CosineDist | 0.130899 | 0.001278 | **102.41x** |
+| CorrDist | 0.212448 | 0.000889 | **239.11x** |
+| ChiSqDist | 0.110598 | 0.025816 | 4.2841x |
+| KLDivergence | 0.177114 | 0.103134 | 1.7173x |
+| JSDivergence | 1.135585 | 1.030385 | 1.1021x |
+| WeightedSqEuclidean | 0.101272 | 0.00064 | **158.18x** |
+| WeightedEuclidean | 0.103933 | 0.000994 | **104.53x** |
+| WeightedCityblock | 0.101804 | 0.017774 | 5.7278x |
+| WeightedMinkowski | 1.381289 | 1.30307 | 1.0600x |
+| WeightedHamming | 0.095391 | 0.011416 | 8.3559x |
+| SqMahalanobis | 0.348651 | 0.000758 | **460.14x** |
+| Mahalanobis | 0.360126 | 0.001236 | **291.48x** |
+
+For distances of which a major part of the computation is a quadratic form (e.g. *Euclidean*, *CosineDist*, *Mahalanobis*), the performance can be drastically improved by restructuring the computation and delegating the core part to ``GEMM`` in *BLAS*. The use of this strategy can easily lead to 100x performance gain over simple loops (see the highlighted part of the table above).
 
 
