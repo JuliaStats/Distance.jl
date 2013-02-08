@@ -20,9 +20,10 @@ For ``Euclidean distance``, ``Squared Euclidean distance``, ``Cityblock distance
 
 ## Basic Use
 
-The library supports three ways of computation.
+The library supports three ways of computation: *computing the distance between two vectors*, *column-wise computation*, and *pairwise computation*.
 
-* Computing the distance between two vectors
+
+#### Computing the distance between two vectors
 
 Each distance corresponds to a *distance type*. You can always compute a certain distance between two vectors using the following syntax
 
@@ -42,7 +43,7 @@ Common distances also come with convenient functions for distance evaluation. Fo
 r = euclidean(x, y)
 ```
 
-* Computing distances between corresponding columns
+#### Computing distances between corresponding columns
 
 Suppose you have two ``m-by-n`` matrix ``X`` and ``Y``, then you can compute all distances between corresponding columns of X and Y in one batch, using the ``colwise`` function, as
 
@@ -54,7 +55,7 @@ The output ``r`` is a vector of length ``n``. In particular, ``r[i]`` is the dis
 
 Note that either of ``X`` and ``Y`` can be just a single vector -- then the ``colwise`` function will compute the distance between this vector and each column of the other parameter.
 
-* Computing pairwise distances
+#### Computing pairwise distances
 
 Let ``X`` and ``Y`` respectively have ``m`` and ``n`` columns. Then the ``pairwise`` function computes distances between each pair of columns in ``X`` and ``Y``:
 
@@ -74,7 +75,7 @@ This statement will result in an ``m-by-m`` matrix, where ``R[i,j]`` is the dist
 ``pairwise(dist, X)`` is typically more efficient than ``pairwise(dist, X, X)``, as the former will take advantage of the symmetry when ``dist`` is a semi-metric (including metric).
 
 
-* Computing column-wise and pairwise distances inplace
+#### Computing column-wise and pairwise distances inplace
 
 If the vector/matrix to store the results are pre-allocated, you may use the storage (without creating a new array) using the following syntax:
 
