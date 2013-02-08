@@ -1,6 +1,6 @@
-# Metrics
+# Distance.jl
 
-Evaluation of distances(metrics) between vectors.
+A Julia package for evaluating distances(metrics) between vectors.
 
 ## Supported distances
 
