@@ -1,6 +1,8 @@
 
 using Devectorize
 
+typealias AbstractVecOrMat{T} Union(AbstractArray{T,2},AbstractArray{T,1})
+
 ###########################################################
 #
 #   Computation of quadratic form
@@ -30,37 +32,37 @@ using Devectorize
 
 # dimension checking helpers (for At_Q_B)
 
-function atqb_check_dims(Q::Vector, a::VecOrMat, b::VecOrMat)
+function atqb_check_dims(Q::AbstractVector, a::AbstractVecOrMat, b::AbstractVecOrMat)
 	if !(length(Q) == size(a,1) == size(b,1))
 		throw(ArgumentError("Mismatched dimensions."))
 	end
 end
 
-function atqb_check_dims(Q::Vector, a::VecOrMat)
+function atqb_check_dims(Q::AbstractVector, a::AbstractVecOrMat)
 	if !(length(Q) == size(a,1))
 		throw(ArgumentError("Mismatched dimensions."))
 	end
 end
 
-function atqb_check_dims(Q::Matrix, a::VecOrMat, b::VecOrMat)
+function atqb_check_dims(Q::AbstractMatrix, a::AbstractVecOrMat, b::AbstractVecOrMat)
 	if !(size(Q, 1) == size(a,1) && size(Q, 2) == size(b,1))
 		throw(ArgumentError("Mismatched dimensions."))
 	end
 end
 
-function atqb_check_dims(Q::Matrix, a::VecOrMat)
+function atqb_check_dims(Q::AbstractMatrix, a::AbstractVecOrMat)
 	if !(size(Q, 1) == size(Q, 2) == size(a,1))
 		throw(ArgumentError("Mismatched dimensions."))
 	end
 end
 
-function atqb_check_rsize(r::Array, len::Int)
+function atqb_check_rsize(r::AbstractArray, len::Int)
 	if length(r) != len
 		throw(ArgumentError("Incorrect length of r."))
 	end
 end
 
-function atqb_check_rsize(r::Array, siz::(Int, Int))
+function atqb_check_rsize(r::AbstractArray, siz::(Int, Int))
 	if !(size(r) == siz)
 		throw(ArgumentError("Incorrect size of r."))
 	end
@@ -69,17 +71,17 @@ end
 
 # At_Q_B & At_Q_A (Q is a vector)
 
-function At_Q_B{T<:FloatingPoint}(Q::Vector{T}, a::Vector{T}, b::Vector{T})
+function At_Q_B{T<:FloatingPoint}(Q::AbstractVector{T}, a::AbstractVector{T}, b::AbstractVector{T})
 	@devec r = sum(Q .* a .* b)
 	return r
 end
 
-function At_Q_A{T<:FloatingPoint}(Q::Vector{T}, a::Vector{T})
+function At_Q_A{T<:FloatingPoint}(Q::AbstractVector{T}, a::AbstractVector{T})
 	@devec r = sum(Q .* sqr(a))
 	return r
 end
 
-function At_Q_B!{T<:FloatingPoint}(r::Array{T}, Q::Vector{T}, a::Vector{T}, b::Matrix{T})
+function At_Q_B!{T<:FloatingPoint}(r::AbstractArray{T}, Q::AbstractVector{T}, a::AbstractVector{T}, b::AbstractMatrix{T})
 	atqb_check_dims(Q, a, b)
 	n = size(b, 2)
 	atqb_check_rsize(r, n)
@@ -89,7 +91,7 @@ function At_Q_B!{T<:FloatingPoint}(r::Array{T}, Q::Vector{T}, a::Vector{T}, b::M
 	end
 end
 
-function At_Q_B!{T<:FloatingPoint}(r::Array{T}, Q::Vector{T}, a::Matrix{T}, b::Vector{T})
+function At_Q_B!{T<:FloatingPoint}(r::AbstractArray{T}, Q::AbstractVector{T}, a::AbstractMatrix{T}, b::AbstractVector{T})
 	atqb_check_dims(Q, a, b)
 	n = size(a, 2)
 	atqb_check_rsize(r, n)
@@ -99,7 +101,7 @@ function At_Q_B!{T<:FloatingPoint}(r::Array{T}, Q::Vector{T}, a::Matrix{T}, b::V
 	end
 end
 
-function At_Q_B!{T<:FloatingPoint}(r::Matrix{T}, Q::Vector{T}, a::Matrix{T}, b::Matrix{T})
+function At_Q_B!{T<:FloatingPoint}(r::AbstractMatrix{T}, Q::AbstractVector{T}, a::AbstractMatrix{T}, b::AbstractMatrix{T})
 	atqb_check_dims(Q, a, b)
 	m = size(a, 2)
 	n = size(b, 2)
@@ -112,7 +114,7 @@ function At_Q_B!{T<:FloatingPoint}(r::Matrix{T}, Q::Vector{T}, a::Matrix{T}, b::
 	At_mul_B(r, a, t)
 end
 
-function At_Q_A!{T<:FloatingPoint}(r::Matrix{T}, Q::Vector{T}, a::Matrix{T})
+function At_Q_A!{T<:FloatingPoint}(r::AbstractMatrix{T}, Q::AbstractVector{T}, a::AbstractMatrix{T})
 	atqb_check_dims(Q, a)
 	n = size(a, 2)
 	atqb_check_rsize(r, (n, n))
@@ -125,25 +127,25 @@ function At_Q_A!{T<:FloatingPoint}(r::Matrix{T}, Q::Vector{T}, a::Matrix{T})
 end
 
 
-function At_Q_B{T<:FloatingPoint}(Q::Vector{T}, a::Vector{T}, b::Matrix{T})
+function At_Q_B{T<:FloatingPoint}(Q::AbstractVector{T}, a::AbstractVector{T}, b::AbstractMatrix{T})
 	r = Array(T, size(b, 2))
 	At_Q_B!(r, Q, a, b)
 	return r
 end
 
-function At_Q_B{T<:FloatingPoint}(Q::Vector{T}, a::Matrix{T}, b::Vector{T})
+function At_Q_B{T<:FloatingPoint}(Q::AbstractVector{T}, a::AbstractMatrix{T}, b::AbstractVector{T})
 	r = Array(T, size(a, 2))
 	At_Q_B!(r, Q, a, b)
 	return r
 end
 
-function At_Q_B{T<:FloatingPoint}(Q::Vector{T}, a::Matrix{T}, b::Matrix{T})
+function At_Q_B{T<:FloatingPoint}(Q::AbstractVector{T}, a::AbstractMatrix{T}, b::AbstractMatrix{T})
 	r = Array(T, (size(a, 2), size(b, 2)))
 	At_Q_B!(r, Q, a, b)
 	return r
 end
 
-function At_Q_A{T<:FloatingPoint}(Q::Vector{T}, a::Matrix{T})
+function At_Q_A{T<:FloatingPoint}(Q::AbstractVector{T}, a::AbstractMatrix{T})
 	n = size(a, 2)
 	r = Array(T, (n, n))
 	At_Q_A!(r, Q, a)
@@ -154,15 +156,15 @@ end
 # At_Q_B & At_Q_A (Q is a matrix)
 
 
-function At_Q_B{T<:FloatingPoint}(Q::Matrix{T}, a::Vector{T}, b::Vector{T})
+function At_Q_B{T<:FloatingPoint}(Q::AbstractMatrix{T}, a::AbstractVector{T}, b::AbstractVector{T})
 	dot(a, Q * b)
 end
 
-function At_Q_A{T<:FloatingPoint}(Q::Matrix{T}, a::Vector{T})
+function At_Q_A{T<:FloatingPoint}(Q::AbstractMatrix{T}, a::AbstractVector{T})
 	dot(a, Q * a)
 end
 
-function At_Q_B!{T<:FloatingPoint}(r::Array{T}, Q::Matrix{T}, a::Vector{T}, b::Matrix{T})
+function At_Q_B!{T<:FloatingPoint}(r::AbstractArray{T}, Q::AbstractMatrix{T}, a::AbstractVector{T}, b::AbstractMatrix{T})
 	atqb_check_dims(Q, a, b)
 	n = size(b, 2)
 	atqb_check_rsize(r, n)
@@ -174,7 +176,7 @@ function At_Q_B!{T<:FloatingPoint}(r::Array{T}, Q::Matrix{T}, a::Vector{T}, b::M
 	end
 end
 
-function At_Q_B!{T<:FloatingPoint}(r::Array{T}, Q::Matrix{T}, a::Matrix{T}, b::Vector{T})
+function At_Q_B!{T<:FloatingPoint}(r::AbstractArray{T}, Q::AbstractMatrix{T}, a::AbstractMatrix{T}, b::AbstractVector{T})
 	atqb_check_dims(Q, a, b)
 	n = size(a, 2)
 	atqb_check_rsize(r, n)
@@ -185,7 +187,7 @@ function At_Q_B!{T<:FloatingPoint}(r::Array{T}, Q::Matrix{T}, a::Matrix{T}, b::V
 	end
 end
 
-function At_Q_B!{T<:FloatingPoint}(r::Matrix{T}, Q::Matrix{T}, a::Matrix{T}, b::Matrix{T})
+function At_Q_B!{T<:FloatingPoint}(r::AbstractMatrix{T}, Q::AbstractMatrix{T}, a::AbstractMatrix{T}, b::AbstractMatrix{T})
 	atqb_check_dims(Q, a, b)
 	m = size(a, 2)
 	n = size(b, 2)
@@ -194,7 +196,7 @@ function At_Q_B!{T<:FloatingPoint}(r::Matrix{T}, Q::Matrix{T}, a::Matrix{T}, b::
 	At_mul_B(r, a, Q * b)
 end
 
-function At_Q_A!{T<:FloatingPoint}(r::Matrix{T}, Q::Matrix{T}, a::Matrix{T})
+function At_Q_A!{T<:FloatingPoint}(r::AbstractMatrix{T}, Q::AbstractMatrix{T}, a::AbstractMatrix{T})
 	atqb_check_dims(Q, a)
 	n = size(a, 2)
 	atqb_check_rsize(r, (n, n))
@@ -202,25 +204,25 @@ function At_Q_A!{T<:FloatingPoint}(r::Matrix{T}, Q::Matrix{T}, a::Matrix{T})
 	At_mul_B(r, a, Q * a)
 end
 
-function At_Q_B{T<:FloatingPoint}(Q::Matrix{T}, a::Vector{T}, b::Matrix{T})
+function At_Q_B{T<:FloatingPoint}(Q::AbstractMatrix{T}, a::AbstractVector{T}, b::AbstractMatrix{T})
 	r = Array(T, size(b, 2))
 	At_Q_B!(r, Q, a, b)
 	return r
 end
 
-function At_Q_B{T<:FloatingPoint}(Q::Matrix{T}, a::Matrix{T}, b::Vector{T})
+function At_Q_B{T<:FloatingPoint}(Q::AbstractMatrix{T}, a::AbstractMatrix{T}, b::AbstractVector{T})
 	r = Array(T, size(a, 2))
 	At_Q_B!(r, Q, a, b)
 	return r
 end
 
-function At_Q_B{T<:FloatingPoint}(Q::Matrix{T}, a::Matrix{T}, b::Matrix{T})
+function At_Q_B{T<:FloatingPoint}(Q::AbstractMatrix{T}, a::AbstractMatrix{T}, b::AbstractMatrix{T})
 	r = Array(T, (size(a, 2), size(b, 2)))
 	At_Q_B!(r, Q, a, b)
 	return r
 end
 
-function At_Q_A{T<:FloatingPoint}(Q::Matrix{T}, a::Matrix{T})
+function At_Q_A{T<:FloatingPoint}(Q::AbstractMatrix{T}, a::AbstractMatrix{T})
 	n = size(a, 2)
 	r = Array(T, (n, n))
 	At_Q_A!(r, Q, a)
@@ -230,37 +232,37 @@ end
 
 # dimension checking helpers (for A_Q_Bt)
 
-function aqbt_check_dims(Q::Vector, a::VecOrMat, b::VecOrMat)
+function aqbt_check_dims(Q::AbstractVector, a::AbstractVecOrMat, b::AbstractVecOrMat)
 	if !(length(Q) == size(a,2) == size(b,2))
 		throw(ArgumentError("Mismatched dimensions."))
 	end
 end
 
-function aqbt_check_dims(Q::Vector, a::VecOrMat)
+function aqbt_check_dims(Q::AbstractVector, a::AbstractVecOrMat)
 	if !(length(Q) == size(a,2))
 		throw(ArgumentError("Mismatched dimensions."))
 	end
 end
 
-function aqbt_check_dims(Q::Matrix, a::VecOrMat, b::VecOrMat)
+function aqbt_check_dims(Q::AbstractMatrix, a::AbstractVecOrMat, b::AbstractVecOrMat)
 	if !(size(Q,1) == size(a,2) && size(Q,2) == size(b,2))
 		throw(ArgumentError("Mismatched dimensions."))
 	end
 end
 
-function aqbt_check_dims(Q::Matrix, a::VecOrMat)
+function aqbt_check_dims(Q::AbstractMatrix, a::AbstractVecOrMat)
 	if !(size(Q,1) == size(Q,2) == size(a,2))
 		throw(ArgumentError("Mismatched dimensions."))
 	end
 end
 
-function aqbt_check_rsize(r::Array, len::Int)
+function aqbt_check_rsize(r::AbstractArray, len::Int)
 	if length(r) != len
 		throw(ArgumentError("Incorrect length of r."))
 	end
 end
 
-function aqbt_check_rsize(r::Array, siz::(Int, Int))
+function aqbt_check_rsize(r::AbstractArray, siz::(Int, Int))
 	if !(size(r) == siz)
 		throw(ArgumentError("Incorrect size of r."))
 	end
