@@ -12,6 +12,7 @@ A Julia package for evaluating distances(metrics) between vectors.
 * Hamming distance
 * Cosine distance
 * Correlation distance
+* Chi-square distance
 * Kullback-Leibler divergence
 * Jensen-Shannon divergence
 * Mahalanobis distance
@@ -120,6 +121,7 @@ Each distance corresponds to a distance type. The type name and the correspondin
 |  Hamming             |  hamming(x, y)       | sum(x .!= y) |
 |  CosineDist          |  cosine_dist(x, y)   | 1 - dot(x, y) / (norm(x) * norm(y)) |
 |  CorrDist            |  corr_dist(x, y)     | cosine_dist(x - mean(x), y - mean(y)) |
+|  ChiSqDist           |  chisq_dist(x, y)    | sum((x - y).^2 / (x + y)) | 
 |  KLDivergence        |  kl_divergence(x, y) | sum(p .* log(p ./ q)) |
 |  JSDivergence        |  js_divergence(x, y) | KL(x, m) / 2 + KL(y, m) / 2 with m = (x + y) / 2 |
 |  Mahalanobis         |  mahalanobis(x, y, Q)    | sqrt((x - y)' * Q * (x - y)) |

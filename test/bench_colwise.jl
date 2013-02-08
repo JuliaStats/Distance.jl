@@ -3,15 +3,6 @@
 
 using Distance
 
-function sqeuc_pw(a::Matrix, b::Matrix)
-	r = pairwise(SqEuclidean(), a, b)
-end
-
-function euc_pw(a::Matrix, b::Matrix)
-	r = pairwise(Euclidean(), a, b)
-end
-
-
 macro bench_colwise_dist(dist, x, y)
 	quote
 		println("bench ", typeof($dist))
@@ -28,7 +19,7 @@ macro bench_colwise_dist(dist, x, y)
 			n = size($x, 2)
 			r = Array(typeof(r1), n)
 			for j = 1 : n
-				($x)[j] = evaluate($dist, ($x)[:,j], ($y)[:,j])
+				r[j] = evaluate($dist, ($x)[:,j], ($y)[:,j])
 			end
 		end
 		@printf "    loop:     t = %9.6fs\n" (t0 / repeat) 
@@ -53,7 +44,6 @@ y = rand(m, n)
 @bench_colwise_dist Cityblock() x y
 @bench_colwise_dist Chebyshev() x y
 @bench_colwise_dist Minkowski(3.0) x y
-@bench_colwise_dist Hamming() x y
 @bench_colwise_dist CosineDist() x y
 @bench_colwise_dist CorrDist() x y
 @bench_colwise_dist KLDivergence() x y
