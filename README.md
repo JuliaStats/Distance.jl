@@ -110,25 +110,25 @@ This type system has practical significance. For example, when computing pairwis
 
 Each distance corresponds to a distance type. The type name and the corresponding mathematical definitions of the distances are listed in the following table.
 
-| type name            |  math definition     | 
-| -------------------- | -------------------- |
-|  Euclidean           |  sqrt(sum((x - y) .^ 2)) |
-|  SqEuclidean         |  sum((x - y).^2) |
-|  Cityblock           |  sum(abs(x - y)) |
-|  Chebyshev           |  max(abs(x - y)) |
-|  Minkowski           |  sum(abs(x - y).^p) ^ (1/p) |
-|  Hamming             |  sum(x .!= y) |
-|  CosineDist          |  1 - dot(x, y) / (norm(x) * norm(y)) |
-|  CorrDist            |  1 - dot(u, v) / (norm(u) * norm(v)), u = x - mean(x), v = y - mean(y) |
-|  KLDivergence        |  sum(p .* log(p ./ q)) |
-|  JSDivergence        |  KL(x, m) / 2 + KL(y, m) / 2 with m = (x + y) / 2 |
-|  Mahalanobis         |  sqrt((x - y)' * Q * (x - y)) |
-|  SqMahalanobis       |  (x - y)' * Q * (x - y)  |
-|  WeightedEuclidean   |  sqrt(sum((x - y).^2 .* w))  |
-|  WeightedSqEuclidean |  sum((x - y).^2 .* w)  |
-|  WeightedCityblock   |  sum(abs(x - y) .* w)  |
-|  WeightedMinkowski   |  sum(abs(x - y).^p .* w) ^ (1/p)  |
-|  WeightedHamming     |  sum((x .!= y) .* w)  |
+| type name            |  convenient syntax   | math definition     | 
+| -------------------- | -------------------- | --------------------|
+|  Euclidean           |  euclidean(x, y)     | sqrt(sum((x - y) .^ 2)) |
+|  SqEuclidean         |  sqeuclidean(x, y)   | sum((x - y).^2) |
+|  Cityblock           |  cityblock(x, y)     | sum(abs(x - y)) |
+|  Chebyshev           |  chebyshev(x, y)     | max(abs(x - y)) |
+|  Minkowski           |  minkowski(x, y, p)  | sum(abs(x - y).^p) ^ (1/p) |
+|  Hamming             |  hamming(x, y)       | sum(x .!= y) |
+|  CosineDist          |  cosine_dist(x, y)   | 1 - dot(x, y) / (norm(x) * norm(y)) |
+|  CorrDist            |  corr_dist(x, y)     | cosine_dist(x - mean(x), y - mean(y)) |
+|  KLDivergence        |  kl_divergence(x, y) | sum(p .* log(p ./ q)) |
+|  JSDivergence        |  js_divergence(x, y) | KL(x, m) / 2 + KL(y, m) / 2 with m = (x + y) / 2 |
+|  Mahalanobis         |  mahalanobis(x, y, Q)    | sqrt((x - y)' * Q * (x - y)) |
+|  SqMahalanobis       |  sqmahalanobis(x, y, Q)  |  (x - y)' * Q * (x - y)  |
+|  WeightedEuclidean   |  euclidean(x, y, w)      | sqrt(sum((x - y).^2 .* w))  |
+|  WeightedSqEuclidean |  sqeuclidean(x, y, w)    | sum((x - y).^2 .* w)  |
+|  WeightedCityblock   |  cityblock(x, y, w)      | sum(abs(x - y) .* w)  |
+|  WeightedMinkowski   |  minkowski(x, y, w, p)   | sum(abs(x - y).^p .* w) ^ (1/p)  |
+|  WeightedHamming     |  hamming(x, y, w)        | sum((x .!= y) .* w)  |
   
 **Note:** The formulas above are using *Julia*'s functions. These formulas are mainly for conveying the math concepts in a concise way. The actual implementation may use a faster way.
 

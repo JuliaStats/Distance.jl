@@ -63,22 +63,22 @@ jsv = kl_divergence(p, pm) / 2 + kl_divergence(q, pm) / 2
 
 w = rand(size(x))
 
-@test weighted_sqeuclidean(x, x, w) == 0.
-@test is_approx(weighted_sqeuclidean(x, y, w), dot((x - y).^2, w), 1.0e-14)
+@test sqeuclidean(x, x, w) == 0.
+@test is_approx(sqeuclidean(x, y, w), dot((x - y).^2, w), 1.0e-14)
 
-@test weighted_euclidean(x, x, w) == 0.
-@test weighted_euclidean(x, y, w) == sqrt(weighted_sqeuclidean(x, y, w))
+@test euclidean(x, x, w) == 0.
+@test euclidean(x, y, w) == sqrt(sqeuclidean(x, y, w))
 
-@test weighted_cityblock(x, x, w) == 0.
-@test is_approx(weighted_cityblock(x, y, w), dot(abs(x - y), w), 1.0e-14)
+@test cityblock(x, x, w) == 0.
+@test is_approx(cityblock(x, y, w), dot(abs(x - y), w), 1.0e-14)
 
-@test weighted_minkowski(x, x, w, 2) == 0.
-@test is_approx(weighted_minkowski(x, y, w, 2), weighted_euclidean(x, y, w), 1.0e-14)
+@test minkowski(x, x, w, 2) == 0.
+@test is_approx(minkowski(x, y, w, 2), euclidean(x, y, w), 1.0e-14)
 
 w = rand(size(a))
 
-@test weighted_hamming(a, a, w) == 0.
-@test weighted_hamming(a, b, w) == sum((a .!= b) .* w)
+@test hamming(a, a, w) == 0.
+@test hamming(a, b, w) == sum((a .!= b) .* w)
 
 Q = rand(length(x), length(x))
 Q = Q * Q'  # make sure Q is positive-definite

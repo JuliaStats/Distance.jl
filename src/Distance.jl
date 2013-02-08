@@ -1042,7 +1042,7 @@ function evaluate{T<:FloatingPoint}(dist::WeightedSqEuclidean{T}, a::Vector, b::
 	return r
 end
 
-weighted_sqeuclidean(a::Vector, b::Vector, w::Vector) = evaluate(WeightedSqEuclidean(w), a, b)
+sqeuclidean(a::Vector, b::Vector, w::Vector) = evaluate(WeightedSqEuclidean(w), a, b)
 
 function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedSqEuclidean{T}, a::Matrix, b::Matrix)
 	w = dist.weights
@@ -1109,7 +1109,7 @@ function evaluate{T<:FloatingPoint}(dist::WeightedEuclidean{T}, a::Vector, b::Ve
 	sqrt(evaluate(WeightedSqEuclidean(dist.weights), a, b))
 end
 
-weighted_euclidean(a::Vector, b::Vector, w::Vector) = evaluate(WeightedEuclidean(w), a, b)
+euclidean(a::Vector, b::Vector, w::Vector) = evaluate(WeightedEuclidean(w), a, b)
 
 function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedEuclidean{T}, a::Matrix, b::Matrix)
 	colwise!(r, WeightedSqEuclidean(dist.weights), a, b)
@@ -1139,7 +1139,7 @@ function evaluate{T<:FloatingPoint}(dist::WeightedCityblock{T}, a::Vector, b::Ve
 	return r
 end
 
-weighted_cityblock(a::Vector, b::Vector, w::Vector) = evaluate(WeightedCityblock(w), a, b)
+cityblock(a::Vector, b::Vector, w::Vector) = evaluate(WeightedCityblock(w), a, b)
 
 function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedCityblock{T}, a::Matrix, b::Matrix)
 	w = dist.weights
@@ -1191,7 +1191,7 @@ function evaluate{T<:FloatingPoint}(dist::WeightedMinkowski{T}, a::Vector, b::Ve
 	return r ^ (1 / p)
 end
 
-weighted_minkowski(a::Vector, b::Vector, w::Vector, p::Real) = evaluate(WeightedMinkowski(w, p), a, b)
+minkowski(a::Vector, b::Vector, w::Vector, p::Real) = evaluate(WeightedMinkowski(w, p), a, b)
 
 function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedMinkowski{T}, a::Matrix, b::Matrix)
 	w = dist.weights
@@ -1256,7 +1256,7 @@ function evaluate{T<:FloatingPoint}(dist::WeightedHamming{T}, a::Vector, b::Vect
 	sum((a .!= b) .* w)
 end
 
-weighted_hamming(a::Vector, b::Vector, w::Vector) = evaluate(WeightedHamming(w), a, b)
+hamming(a::Vector, b::Vector, w::Vector) = evaluate(WeightedHamming(w), a, b)
 
 function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedHamming{T}, a::Matrix, b::Matrix)
 	w = dist.weights
