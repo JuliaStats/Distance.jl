@@ -21,6 +21,7 @@ This package also provides carefully optimized functions to compute column-wise 
 * Kullback-Leibler divergence
 * Jensen-Shannon divergence
 * Mahalanobis distance
+* Squared Mahalanobis distance
 
 For ``Euclidean distance``, ``Squared Euclidean distance``, ``Cityblock distance``, ``Minkowski distance``, and ``Hamming distance``, a weighted version is also provided.
 
