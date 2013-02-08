@@ -179,7 +179,7 @@ We can see that using ``colwise`` instead of a simple loop yields considerable g
 
 The table below compares the performance (measured in terms of average elapsed time of each iteration) of a straightforward loop implementation and an optimized implementation provided in *Distance.jl*. The task in each iteration is to compute a specific distance in a pairwise manner between columns in a ``100-by-200`` and ``100-by-250`` matrices, which will result in a ``200-by-250`` distance matrix.
 
-|  distance   |   loop  |   colwise   |   gain     |
+|  distance   |   loop  |   pairwise  |   gain     |
 |------------ | --------| ------------| -----------|
 | SqEuclidean | 0.092455 | 0.000459 | **201.31x** |
 | Euclidean | 0.091295 | 0.000734 | **124.36x** |
