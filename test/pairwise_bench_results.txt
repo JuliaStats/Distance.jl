@@ -1,0 +1,75 @@
+# Mac OS X 10.8.2
+# 2.6 GHz Intel Core i7
+# Julia Commit bbf2aca167 (2013-02-07 13:51:31)
+
+bench SqEuclidean
+    loop:      t =  0.092455s
+    pairwise:  t =  0.000459s  |  gain = 201.3148x
+
+bench Euclidean
+    loop:      t =  0.091295s
+    pairwise:  t =  0.000734s  |  gain = 124.3632x
+
+bench Cityblock
+    loop:      t =  0.090960s
+    pairwise:  t =  0.012827s  |  gain =  7.0913x
+
+bench Chebyshev
+    loop:      t =  0.105589s
+    pairwise:  t =  0.033345s  |  gain =  3.1665x
+
+bench Minkowski
+    loop:      t =  1.015888s
+    pairwise:  t =  0.940429s  |  gain =  1.0802x
+
+bench Hamming
+    loop:      t =  0.086808s
+    pairwise:  t =  0.010143s  |  gain =  8.5583x
+
+bench CosineDist
+    loop:      t =  0.130899s
+    pairwise:  t =  0.001278s  |  gain = 102.4091x
+
+bench CorrDist
+    loop:      t =  0.212448s
+    pairwise:  t =  0.000889s  |  gain = 239.1051x
+
+bench ChiSqDist
+    loop:      t =  0.110598s
+    pairwise:  t =  0.025816s  |  gain =  4.2841x
+
+bench KLDivergence
+    loop:      t =  0.177114s
+    pairwise:  t =  0.103134s  |  gain =  1.7173x
+
+bench JSDivergence
+    loop:      t =  1.135585s
+    pairwise:  t =  1.030385s  |  gain =  1.1021x
+
+bench WeightedSqEuclidean{Float64}
+    loop:      t =  0.101272s
+    pairwise:  t =  0.000640s  |  gain = 158.1754x
+
+bench WeightedEuclidean{Float64}
+    loop:      t =  0.103933s
+    pairwise:  t =  0.000994s  |  gain = 104.5287x
+
+bench WeightedCityblock{Float64}
+    loop:      t =  0.101804s
+    pairwise:  t =  0.017774s  |  gain =  5.7278x
+
+bench WeightedMinkowski{Float64}
+    loop:      t =  1.381289s
+    pairwise:  t =  1.303070s  |  gain =  1.0600x
+
+bench WeightedHamming{Float64}
+    loop:      t =  0.095391s
+    pairwise:  t =  0.011416s  |  gain =  8.3559x
+
+bench SqMahalanobis{Float64}
+    loop:      t =  0.348651s
+    pairwise:  t =  0.000758s  |  gain = 460.1472x
+
+bench Mahalanobis{Float64}
+    loop:      t =  0.360126s
+    pairwise:  t =  0.001236s  |  gain = 291.4798x

@@ -290,35 +290,35 @@ end
 #
 ###########################################################
 
-# function colwise!(r::Array, metric::PreMetric, a::Vector, b::Matrix)
-# 	n = size(b, 2)
-# 	if length(r) != n
-# 		throw(ArgumentError("Incorrect size of r."))
-# 	end
-# 	for j = 1 : n
-# 		r[j] = evaluate(metric, a, b[:,j])
-# 	end
-# end
-# 
-# function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Vector)
-# 	n = size(a, 2)
-# 	if length(r) != n
-# 		throw(ArgumentError("Incorrect size of r."))
-# 	end
-# 	for j = 1 : n
-# 		r[j] = evaluate(metric, a[:,j], b)
-# 	end
-# end
-# 
-# function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Matrix)
-# 	n = get_common_ncols(a, b)
-# 	if length(r) != n
-# 		throw(ArgumentError("Incorrect size of r."))
-# 	end
-# 	for j = 1 : n
-# 		r[j] = evaluate(metric, a[:,j], b[:,j])
-# 	end
-# end
+function colwise!(r::Array, metric::PreMetric, a::Vector, b::Matrix)
+	n = size(b, 2)
+	if length(r) != n
+		throw(ArgumentError("Incorrect size of r."))
+	end
+	for j = 1 : n
+		r[j] = evaluate(metric, a, b[:,j])
+	end
+end
+
+function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Vector)
+	n = size(a, 2)
+	if length(r) != n
+		throw(ArgumentError("Incorrect size of r."))
+	end
+	for j = 1 : n
+		r[j] = evaluate(metric, a[:,j], b)
+	end
+end
+
+function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Matrix)
+	n = get_common_ncols(a, b)
+	if length(r) != n
+		throw(ArgumentError("Incorrect size of r."))
+	end
+	for j = 1 : n
+		r[j] = evaluate(metric, a[:,j], b[:,j])
+	end
+end
 
 function colwise!(r::Array, metric::SemiMetric, a::Matrix, b::Vector)
 	colwise!(r, metric, b, a)
@@ -346,19 +346,19 @@ function colwise(metric::PreMetric, a::Matrix, b::Vector)
 end
 
 
-# function pairwise!(r::Matrix, metric::PreMetric, a::Matrix, b::Matrix)
-# 	na = size(a, 2)
-# 	nb = size(b, 2)
-# 	if !(size(r) == (na, nb))
-# 		throw(ArgumentError("Incorrect size of r."))
-# 	end
-# 	for j = 1 : size(b, 2)
-# 		bj = b[:,j]
-# 		for i = 1 : size(a, 2)
-# 			r[i,j] = evaluate(metric, a[:,i], bj)
-# 		end
-# 	end
-# end
+function pairwise!(r::Matrix, metric::PreMetric, a::Matrix, b::Matrix)
+	na = size(a, 2)
+	nb = size(b, 2)
+	if !(size(r) == (na, nb))
+		throw(ArgumentError("Incorrect size of r."))
+	end
+	for j = 1 : size(b, 2)
+		bj = b[:,j]
+		for i = 1 : size(a, 2)
+			r[i,j] = evaluate(metric, a[:,i], bj)
+		end
+	end
+end
 
 function pairwise!(r::Matrix, metric::PreMetric, a::Matrix)
 	pairwise!(r, metric, a, a)
@@ -366,22 +366,22 @@ end
 
 
 # faster evaluation by leveraging the properties of semi-metrics
-# function pairwise!(r::Matrix, metric::SemiMetric, a::Matrix)
-# 	n = size(a, 2)
-# 	if !(size(r) == (n, n))
-# 		throw(ArgumentError("Incorrect size of r."))
-# 	end
-# 	for j = 1 : n
-# 		for i = 1 : j-1
-# 			a[i,j] = a[j,i]
-# 		end
-# 		a[j,j] = 0
-# 		bj = b[:,j]
-# 		for i = j+1 : n
-# 			a[i,j] = evaluate(metric, a[:,i], bj)
-# 		end
-# 	end
-# end
+function pairwise!(r::Matrix, metric::SemiMetric, a::Matrix)
+	n = size(a, 2)
+	if !(size(r) == (n, n))
+		throw(ArgumentError("Incorrect size of r."))
+	end
+	for j = 1 : n
+		for i = 1 : j-1
+			a[i,j] = a[j,i]
+		end
+		a[j,j] = 0
+		bj = b[:,j]
+		for i = j+1 : n
+			a[i,j] = evaluate(metric, a[:,i], bj)
+		end
+	end
+end
 
 function pairwise(metric::PreMetric, a::Matrix, b::Matrix)
 	m = size(a, 2)
@@ -483,15 +483,32 @@ function colwise!(r::Array, dist::Euclidean, a::Vector, b::Matrix)
 end
 
 function pairwise!(r::Matrix, dist::Euclidean, a::Matrix, b::Matrix)
-	get_pairwise_dims(r, a, b)
-	pairwise!(r, SqEuclidean(), a, b)
-	@devec r[:] = sqrt(max(r, 0))
+	m, na, nb = get_pairwise_dims(r, a, b)
+	At_mul_B(r, a, b)
+	@devec sa2 = sum(sqr(a), 1)
+	@devec sb2 = sum(sqr(b), 1)
+	for j = 1 : nb
+		for i = 1 : na
+			v = sa2[i] + sb2[j] - 2 * r[i,j]
+			r[i,j] = sqrt(max(v, 0))
+		end
+	end
 end
 
 function pairwise!(r::Matrix, dist::Euclidean, a::Matrix)
-	get_pairwise_dims(r, a)
-	pairwise!(r, SqEuclidean(), a)
-	@devec r[:] = sqrt(max(r, 0))
+	m, n = get_pairwise_dims(r, a)
+	At_mul_B(r, a, a)
+	@devec sa2 = sum(sqr(a), 1)
+	for j = 1 : n
+		for i = 1 : j-1
+			r[i,j] = r[j,i]
+		end
+		r[j,j] = 0
+		for i = j+1 : n
+			v = sa2[i] + sa2[j] - 2 * r[i,j]
+			r[i,j] = sqrt(max(v, 0))
+		end
+	end
 end
 
 
@@ -615,11 +632,11 @@ function pairwise!(r::Matrix, dist::Minkowski, a::Matrix, b::Matrix)
 	m, na, nb = get_pairwise_dims(r, a, b)
 	p = dist.p
 	inv_p = 1 / p
-
+	
 	for j = 1 : nb
 		for i = 1 : na
 			@devec t = sum(abs(a[:,i] - b[:,j]) .^ p)
-			r[i,j] = t ^ inv_p
+			r[i,j] = t .^ inv_p
 		end
 	end
 end
@@ -645,7 +662,18 @@ end
 # Hamming
 
 function evaluate(dist::Hamming, a::Vector, b::Vector)
-	sum(a .!= b)
+	n = length(a)
+	if n != length(b)
+		throw(ArgumentError("The length of a and b must match."))
+	end
+	
+	r = 0
+	for i = 1 : n
+		if a[i] != b[i]
+			r += 1
+		end
+	end
+	return r
 end
 
 hamming(a::Vector, b::Vector) = evaluate(Hamming(), a, b)
@@ -887,8 +915,9 @@ function colwise!(r::Array, dist::KLDivergence, a::Matrix, b::Matrix)
 	for j = 1 : n
 		s = zero(T)
 		for i = 1 : m
-			if a[i,j] > 0
-				s += a[i,j] * log(a[i,j] / b[i,j])
+			aij = a[i,j]
+			if aij > 0
+				s += aij * log(aij / b[i,j])
 			end
 		end
 		r[j] = s
@@ -901,8 +930,9 @@ function colwise!(r::Array, dist::KLDivergence, a::Vector, b::Matrix)
 	for j = 1 : n
 		s = zero(T)
 		for i = 1 : m
-			if a[i] > 0
-				s += a[i] * log(a[i] / b[i,j])
+			ai = a[i]
+			if ai > 0
+				s += ai * log(ai / b[i,j])
 			end
 		end
 		r[j] = s
@@ -916,8 +946,9 @@ function colwise!(r::Array, dist::KLDivergence, a::Matrix, b::Vector)
 	for j = 1 : n
 		s = zero(T)
 		for i = 1 : m
-			if a[i,j] > 0
-				s += a[i,j] * log(a[i,j] / b[i])
+			aij = a[i,j]
+			if aij > 0
+				s += aij * log(aij / b[i])
 			end
 		end
 		r[j] = s
@@ -932,8 +963,9 @@ function pairwise!(r::Matrix, dist::KLDivergence, a::Matrix, b::Matrix)
 		for i = 1 : na
 			s = zero(T)
 			for k = 1 : m
-				if a[k,i] > 0
-					s += a[k,i] * log(a[k,i] / b[k,j])		
+				aki = a[k,i]
+				if aki > 0
+					s += aki * log(aki / b[k,j])		
 				end
 			end
 			r[i,j] = s
@@ -955,9 +987,11 @@ function evaluate(dist::JSDivergence, a::Vector, b::Vector)
 		throw(ArgumentError("The lengths of a and b must match."))
 	end
 	for i = 1 : n
-		u = (a[i] + b[i]) / 2
-		ta = a[i] > 0 ? a[i] * log(a[i]) / 2 : 0
-		tb = b[i] > 0 ? b[i] * log(b[i]) / 2: 0
+		ai = a[i]
+		bi = b[i]
+		u = (ai + bi) / 2
+		ta = ai > 0 ? ai * log(ai) / 2 : 0
+		tb = bi > 0 ? bi * log(bi) / 2 : 0
 		tu = u > 0 ? u * log(u) : 0
 		r += (ta + tb - tu)
 	end
@@ -972,9 +1006,11 @@ function colwise!(r::Array, dist::JSDivergence, a::Matrix, b::Matrix)
 	for j = 1 : n
 		s = zero(T)
 		for i = 1 : m
-			u = (a[i,j] + b[i,j]) / 2
-			ta = a[i,j] > 0 ? a[i,j] * log(a[i,j]) / 2 : 0
-			tb = b[i,j] > 0 ? b[i,j] * log(b[i,j]) / 2: 0
+			aij = a[i,j]
+			bij = b[i,j]
+			u = (aij + bij) / 2
+			ta = aij > 0 ? aij * log(aij) / 2 : 0
+			tb = bij > 0 ? bij * log(bij) / 2 : 0
 			tu = u > 0 ? u * log(u) : 0
 			s += (ta + tb - tu)
 		end
@@ -988,9 +1024,11 @@ function colwise!(r::Array, dist::JSDivergence, a::Vector, b::Matrix)
 	for j = 1 : n
 		s = zero(T)
 		for i = 1 : m
-			u = (a[i] + b[i,j]) / 2
-			ta = a[i] > 0 ? a[i] * log(a[i]) / 2 : 0
-			tb = b[i,j] > 0 ? b[i,j] * log(b[i,j]) / 2: 0
+			ai = a[i]
+			bij = b[i,j]
+			u = (ai + bij) / 2
+			ta = ai > 0 ? ai * log(ai) / 2 : 0
+			tb = bij > 0 ? bij * log(bij) / 2 : 0
 			tu = u > 0 ? u * log(u) : 0
 			s += (ta + tb - tu)
 		end
@@ -1005,13 +1043,13 @@ function pairwise!(r::Matrix, dist::JSDivergence, a::Matrix, b::Matrix)
 		for i = 1 : na
 			s = zero(T)
 			for k = 1 : m
-				if a[k,i] > 0
-					u = (a[k,i] + b[k,j]) / 2
-					ta = a[k,i] > 0 ? a[k,i] * log(a[k,i]) / 2 : 0
-					tb = b[k,j] > 0 ? b[k,j] * log(b[k,j]) / 2: 0
-					tu = u > 0 ? u * log(u) : 0
-					s += (ta + tb - tu)	
-				end
+				aki = a[k,i]
+				bkj = b[k,j]
+				u = (aki + bkj) / 2
+				ta = aki > 0 ? aki * log(aki) / 2 : 0
+				tb = bkj > 0 ? bkj * log(bkj) / 2: 0
+				tu = u > 0 ? u * log(u) : 0
+				s += (ta + tb - tu)	
 			end
 			r[i,j] = s
 		end
@@ -1029,13 +1067,13 @@ function pairwise!(r::Matrix, dist::JSDivergence, a::Matrix)
 		for i = j+1 : n
 			s = zero(T)
 			for k = 1 : m
-				if a[k,i] > 0
-					u = (a[k,i] + a[k,j]) / 2
-					ta = a[k,i] > 0 ? a[k,i] * log(a[k,i]) / 2 : 0
-					tb = a[k,j] > 0 ? a[k,j] * log(a[k,j]) / 2 : 0
-					tu = u > 0 ? u * log(u) : 0
-					s += (ta + tb - tu)	
-				end
+				aki = a[k,i]
+				akj = a[k,j]
+				u = (aki + akj) / 2
+				ta = aki > 0 ? aki * log(aki) / 2 : 0
+				tb = akj > 0 ? akj * log(akj) / 2 : 0
+				tu = u > 0 ? u * log(u) : 0
+				s += (ta + tb - tu)	
 			end
 			r[i,j] = s
 		end
@@ -1261,8 +1299,19 @@ end
 # WeightedHamming
 
 function evaluate{T<:FloatingPoint}(dist::WeightedHamming{T}, a::Vector, b::Vector)
+	n = length(a)
+	if n != length(b)
+		throw(ArgumentError("The lengths of a and b must match."))
+	end
 	w = dist.weights
-	sum((a .!= b) .* w)
+	
+	r = zero(T)
+	for i = 1 : n
+		if a[i] != b[i]
+			r += w[i]
+		end
+	end
+	return r
 end
 
 hamming(a::Vector, b::Vector, w::Vector) = evaluate(WeightedHamming(w), a, b)
@@ -1418,12 +1467,12 @@ end
 
 function pairwise!{T<:FloatingPoint}(r::Matrix, dist::Mahalanobis{T}, a::Matrix, b::Matrix)
 	pairwise!(r, SqMahalanobis(dist.qmat), a, b)
-	@devec r[:] = sqrt(r)
+	@devec r[:] = sqrt(max(r, 0))
 end
 
 function pairwise!{T<:FloatingPoint}(r::Matrix, dist::Mahalanobis{T}, a::Matrix)
 	pairwise!(r, SqMahalanobis(dist.qmat), a)
-	@devec r[:] = sqrt(r)
+	@devec r[:] = sqrt(max(r, 0))
 end
 
 

@@ -14,11 +14,11 @@ macro bench_pairwise_dist(repeat, dist, x, y)
 		# timing
 		
 		t0 = @elapsed for k = 1 : $repeat
-			m = size($x, 1)
-			n = size($x, 2)
-			r = Array(typeof(r1), (m, n))
-			for j = 1 : n
-				for i = 1 : m
+			nx = size($x, 2)
+			ny = size($y, 2)
+			r = Array(typeof(r1), (nx, ny))
+			for j = 1 : ny
+				for i = 1 : nx
 					r[i, j] = evaluate($dist, ($x)[:,i], ($y)[:,j])
 				end
 			end
@@ -34,18 +34,35 @@ macro bench_pairwise_dist(repeat, dist, x, y)
 end
 
 
-m = 200
-n = 500
+m = 100
+nx = 200
+ny = 250
 
-x = rand(m, n)
-y = rand(m, n)
+x = rand(m, nx)
+y = rand(m, ny)
+
+w = rand(m)
+Q = rand(m, m)
+Q = Q' * Q
 
 @bench_pairwise_dist 20 SqEuclidean() x y
 @bench_pairwise_dist 20 Euclidean() x y
 @bench_pairwise_dist 20 Cityblock() x y
 @bench_pairwise_dist 20 Chebyshev() x y
-@bench_pairwise_dist 2 Minkowski(3.0) x y
-@bench_pairwise_dist 10 CosineDist() x y
+@bench_pairwise_dist  5 Minkowski(3.0) x y
+@bench_pairwise_dist 20 Hamming() x y
+
+@bench_pairwise_dist 20 CosineDist() x y
 @bench_pairwise_dist 10 CorrDist() x y
-@bench_pairwise_dist 5 KLDivergence() x y
-@bench_pairwise_dist 2 JSDivergence() x y
+@bench_pairwise_dist 20 ChiSqDist() x y 
+@bench_pairwise_dist 10 KLDivergence() x y
+@bench_pairwise_dist  5 JSDivergence() x y
+
+@bench_pairwise_dist 20 WeightedSqEuclidean(w) x y
+@bench_pairwise_dist 20 WeightedEuclidean(w) x y
+@bench_pairwise_dist 20 WeightedCityblock(w) x y
+@bench_pairwise_dist  5 WeightedMinkowski(w, 3.0) x y
+@bench_pairwise_dist 20 WeightedHamming(w) x y
+
+@bench_pairwise_dist 10 SqMahalanobis(Q) x y
+@bench_pairwise_dist 10 Mahalanobis(Q) x y

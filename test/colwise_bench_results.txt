@@ -1,0 +1,75 @@
+# Mac OS X 10.8.2
+# 2.6 GHz Intel Core i7
+# Julia Commit bbf2aca167 (2013-02-07 13:51:31)
+
+bench SqEuclidean
+    loop:     t =  0.038312s
+    colwise:  t =  0.004708s  |  gain =  8.1376x
+
+bench Euclidean
+    loop:     t =  0.036947s
+    colwise:  t =  0.004158s  |  gain =  8.8853x
+
+bench Cityblock
+    loop:     t =  0.037507s
+    colwise:  t =  0.004348s  |  gain =  8.6263x
+
+bench Chebyshev
+    loop:     t =  0.045246s
+    colwise:  t =  0.012861s  |  gain =  3.5179x
+
+bench Minkowski
+    loop:     t =  0.418969s
+    colwise:  t =  0.379957s  |  gain =  1.1027x
+
+bench Hamming
+    loop:     t =  0.035414s
+    colwise:  t =  0.004264s  |  gain =  8.3046x
+
+bench CosineDist
+    loop:     t =  0.053191s
+    colwise:  t =  0.008009s  |  gain =  6.6417x
+
+bench CorrDist
+    loop:     t =  0.085048s
+    colwise:  t =  0.035571s  |  gain =  2.3910x
+
+bench ChiSqDist
+    loop:     t =  0.044070s
+    colwise:  t =  0.008390s  |  gain =  5.2528x
+
+bench KLDivergence
+    loop:     t =  0.071618s
+    colwise:  t =  0.040244s  |  gain =  1.7796x
+
+bench JSDivergence
+    loop:     t =  0.457290s
+    colwise:  t =  0.417977s  |  gain =  1.0941x
+
+bench WeightedSqEuclidean{Float64}
+    loop:     t =  0.040023s
+    colwise:  t =  0.006049s  |  gain =  6.6165x
+
+bench WeightedEuclidean{Float64}
+    loop:     t =  0.039938s
+    colwise:  t =  0.005953s  |  gain =  6.7094x
+
+bench WeightedCityblock{Float64}
+    loop:     t =  0.038502s
+    colwise:  t =  0.006362s  |  gain =  6.0517x
+
+bench WeightedMinkowski{Float64}
+    loop:     t =  0.540418s
+    colwise:  t =  0.510852s  |  gain =  1.0579x
+
+bench WeightedHamming{Float64}
+    loop:     t =  0.039012s
+    colwise:  t =  0.004541s  |  gain =  8.5920x
+
+bench SqMahalanobis{Float64}
+    loop:     t =  0.135427s
+    colwise:  t =  0.040468s  |  gain =  3.3465x
+
+bench Mahalanobis{Float64}
+    loop:     t =  0.135613s
+    colwise:  t =  0.042030s  |  gain =  3.2266x
