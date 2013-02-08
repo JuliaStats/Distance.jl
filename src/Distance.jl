@@ -164,7 +164,7 @@ result_type{T}(::SqMahalanobis{T}, T1::Type, T2::Type) = T
 #
 ###########################################################
 
-function get_common_ncols(a::Matrix, b::Matrix)
+function get_common_ncols(a::AbstractMatrix, b::AbstractMatrix)
 	na = size(a, 2)
 	nb = size(b, 2)
 	if na != nb
@@ -176,7 +176,7 @@ end
 # the following functions are supposed to be used in inplace-functions
 # and they only apply to cases where vector dimensions are the same
 
-function get_colwise_dims(r::Array, a::Matrix, b::Matrix)
+function get_colwise_dims(r::AbstractArray, a::AbstractMatrix, b::AbstractMatrix)
 	if !(size(a) == size(b))
 		throw(ArgumentError("The sizes of a and b must match."))
 	end
@@ -186,7 +186,7 @@ function get_colwise_dims(r::Array, a::Matrix, b::Matrix)
 	return size(a)
 end
 
-function get_colwise_dims(r::Array, a::Vector, b::Matrix)
+function get_colwise_dims(r::AbstractArray, a::AbstractVector, b::AbstractMatrix)
 	if length(a) != size(b, 1)
 		throw(ArgumentError("The length of a must match the number of rows in b."))
 	end
@@ -196,7 +196,7 @@ function get_colwise_dims(r::Array, a::Vector, b::Matrix)
 	return size(b)
 end
 
-function get_colwise_dims(r::Array, a::Matrix, b::Vector)
+function get_colwise_dims(r::AbstractArray, a::AbstractMatrix, b::AbstractVector)
 	if !(size(a, 1) == length(b))
 		throw(ArgumentError("The length of b must match the number of rows in a."))
 	end
@@ -206,7 +206,7 @@ function get_colwise_dims(r::Array, a::Matrix, b::Vector)
 	return size(a)
 end
 
-function get_pairwise_dims(r::Matrix, a::Matrix, b::Matrix)
+function get_pairwise_dims(r::AbstractMatrix, a::AbstractMatrix, b::AbstractMatrix)
 	ma, na = size(a)
 	mb, nb = size(b)
 	if ma != mb
@@ -218,7 +218,7 @@ function get_pairwise_dims(r::Matrix, a::Matrix, b::Matrix)
 	return (ma, na, nb)
 end
 
-function get_pairwise_dims(r::Matrix, a::Matrix)
+function get_pairwise_dims(r::AbstractMatrix, a::AbstractMatrix)
 	m, n = size(a)
 	if !(size(r) == (n, n))
 		throw(ArgumentError("Incorrect size of r."))
@@ -229,7 +229,7 @@ end
 
 # for weighted metrics
 
-function get_colwise_dims(d::Int, r::Array, a::Matrix, b::Matrix)
+function get_colwise_dims(d::Int, r::AbstractArray, a::AbstractMatrix, b::AbstractMatrix)
 	if !(size(a, 1) == size(b, 1) == d)
 		throw(ArgumentError("Incorrect vector dimensions."))
 	end
@@ -239,7 +239,7 @@ function get_colwise_dims(d::Int, r::Array, a::Matrix, b::Matrix)
 	return size(a)
 end
 
-function get_colwise_dims(d::Int, r::Array, a::Vector, b::Matrix)
+function get_colwise_dims(d::Int, r::AbstractArray, a::AbstractVector, b::AbstractMatrix)
 	if !(length(a) == size(b, 1) == d)
 		throw(ArgumentError("Incorrect vector dimensions."))
 	end
@@ -249,7 +249,7 @@ function get_colwise_dims(d::Int, r::Array, a::Vector, b::Matrix)
 	return size(b)
 end
 
-function get_colwise_dims(d::Int, r::Array, a::Matrix, b::Vector)
+function get_colwise_dims(d::Int, r::AbstractArray, a::AbstractMatrix, b::AbstractVector)
 	if !(size(a, 1) == length(b) == d)
 		throw(ArgumentError("Incorrect vector dimensions."))
 	end
@@ -259,7 +259,7 @@ function get_colwise_dims(d::Int, r::Array, a::Matrix, b::Vector)
 	return size(a)
 end
 
-function get_pairwise_dims(d::Int, r::Matrix, a::Matrix, b::Matrix)
+function get_pairwise_dims(d::Int, r::AbstractMatrix, a::AbstractMatrix, b::AbstractMatrix)
 	na = size(a, 2)
 	nb = size(b, 2)
 	if !(size(a, 1) == size(b, 1) == d)
@@ -271,7 +271,7 @@ function get_pairwise_dims(d::Int, r::Matrix, a::Matrix, b::Matrix)
 	return (d, na, nb)
 end
 
-function get_pairwise_dims(d::Int, r::Matrix, a::Matrix)
+function get_pairwise_dims(d::Int, r::AbstractMatrix, a::AbstractMatrix)
 	n = size(a, 2)
 	if !(size(a, 1) == d)
 		throw(ArgumentError("Incorrect vector dimensions."))
@@ -290,7 +290,7 @@ end
 #
 ###########################################################
 
-function colwise!(r::Array, metric::PreMetric, a::Vector, b::Matrix)
+function colwise!(r::AbstractArray, metric::PreMetric, a::AbstractVector, b::AbstractMatrix)
 	n = size(b, 2)
 	if length(r) != n
 		throw(ArgumentError("Incorrect size of r."))
@@ -300,7 +300,7 @@ function colwise!(r::Array, metric::PreMetric, a::Vector, b::Matrix)
 	end
 end
 
-function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Vector)
+function colwise!(r::AbstractArray, metric::PreMetric, a::AbstractMatrix, b::AbstractVector)
 	n = size(a, 2)
 	if length(r) != n
 		throw(ArgumentError("Incorrect size of r."))
@@ -310,7 +310,7 @@ function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Vector)
 	end
 end
 
-function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Matrix)
+function colwise!(r::AbstractArray, metric::PreMetric, a::AbstractMatrix, b::AbstractMatrix)
 	n = get_common_ncols(a, b)
 	if length(r) != n
 		throw(ArgumentError("Incorrect size of r."))
@@ -320,25 +320,25 @@ function colwise!(r::Array, metric::PreMetric, a::Matrix, b::Matrix)
 	end
 end
 
-function colwise!(r::Array, metric::SemiMetric, a::Matrix, b::Vector)
+function colwise!(r::AbstractArray, metric::SemiMetric, a::AbstractMatrix, b::AbstractVector)
 	colwise!(r, metric, b, a)
 end
 
-function colwise(metric::PreMetric, a::Matrix, b::Matrix)
+function colwise(metric::PreMetric, a::AbstractMatrix, b::AbstractMatrix)
 	n = get_common_ncols(a, b)
 	r = Array(result_type(metric, eltype(a), eltype(b)), n)
 	colwise!(r, metric, a, b)
 	return r
 end
 
-function colwise(metric::PreMetric, a::Vector, b::Matrix)
+function colwise(metric::PreMetric, a::AbstractVector, b::AbstractMatrix)
 	n = size(b, 2)
 	r = Array(result_type(metric, eltype(a), eltype(b)), n)
 	colwise!(r, metric, a, b)
 	return r
 end
 
-function colwise(metric::PreMetric, a::Matrix, b::Vector)
+function colwise(metric::PreMetric, a::AbstractMatrix, b::AbstractVector)
 	n = size(a, 2)
 	r = Array(result_type(metric, eltype(a), eltype(b)), n)
 	colwise!(r, metric, a, b)
@@ -346,7 +346,7 @@ function colwise(metric::PreMetric, a::Matrix, b::Vector)
 end
 
 
-function pairwise!(r::Matrix, metric::PreMetric, a::Matrix, b::Matrix)
+function pairwise!(r::AbstractMatrix, metric::PreMetric, a::AbstractMatrix, b::AbstractMatrix)
 	na = size(a, 2)
 	nb = size(b, 2)
 	if !(size(r) == (na, nb))
@@ -360,13 +360,13 @@ function pairwise!(r::Matrix, metric::PreMetric, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, metric::PreMetric, a::Matrix)
+function pairwise!(r::AbstractMatrix, metric::PreMetric, a::AbstractMatrix)
 	pairwise!(r, metric, a, a)
 end
 
 
 # faster evaluation by leveraging the properties of semi-metrics
-function pairwise!(r::Matrix, metric::SemiMetric, a::Matrix)
+function pairwise!(r::AbstractMatrix, metric::SemiMetric, a::AbstractMatrix)
 	n = size(a, 2)
 	if !(size(r) == (n, n))
 		throw(ArgumentError("Incorrect size of r."))
@@ -383,7 +383,7 @@ function pairwise!(r::Matrix, metric::SemiMetric, a::Matrix)
 	end
 end
 
-function pairwise(metric::PreMetric, a::Matrix, b::Matrix)
+function pairwise(metric::PreMetric, a::AbstractMatrix, b::AbstractMatrix)
 	m = size(a, 2)
 	n = size(b, 2)
 	r = Array(result_type(metric, eltype(a), eltype(b)), (m, n))
@@ -391,14 +391,14 @@ function pairwise(metric::PreMetric, a::Matrix, b::Matrix)
 	return r
 end
 
-function pairwise(metric::PreMetric, a::Matrix)
+function pairwise(metric::PreMetric, a::AbstractMatrix)
 	n = size(a, 2)
 	r = Array(result_type(metric, eltype(a), eltype(a)), (n, n))
 	pairwise!(r, metric, a)
 	return r
 end
 
-function pairwise(metric::SemiMetric, a::Matrix)
+function pairwise(metric::SemiMetric, a::AbstractMatrix)
 	n = size(a, 2)
 	r = Array(result_type(metric, eltype(a), eltype(a)), (n, n))
 	pairwise!(r, metric, a)
@@ -414,26 +414,26 @@ end
 
 # SqEuclidean
 
-function evaluate(dist::SqEuclidean, a::Vector, b::Vector)
+function evaluate(dist::SqEuclidean, a::AbstractVector, b::AbstractVector)
 	@devec r = sum(sqr(a - b))
 	return r
 end
 
-sqeuclidean(a::Vector, b::Vector) = evaluate(SqEuclidean(), a, b)
+sqeuclidean(a::AbstractVector, b::AbstractVector) = evaluate(SqEuclidean(), a, b)
 
-function colwise!(r::Array, dist::SqEuclidean, a::Matrix, b::Matrix)
+function colwise!(r::AbstractArray, dist::SqEuclidean, a::AbstractMatrix, b::AbstractMatrix)
 	get_colwise_dims(r, a, b)
 	@devec r[:] = sum(sqr(a - b), 1)
 end
 
-function colwise!(r::Array, dist::SqEuclidean, a::Vector, b::Matrix)
+function colwise!(r::AbstractArray, dist::SqEuclidean, a::AbstractVector, b::AbstractMatrix)
 	m, n = get_colwise_dims(r, a, b)
 	for j = 1 : n
 		@devec r[j] = sum(sqr(a - b[:,j]))
 	end
 end
 
-function pairwise!(r::Matrix, dist::SqEuclidean, a::Matrix, b::Matrix)
+function pairwise!(r::AbstractMatrix, dist::SqEuclidean, a::AbstractMatrix, b::AbstractMatrix)
 	m, na, nb = get_pairwise_dims(r, a, b)
 	At_mul_B(r, a, b)
 	@devec sa2 = sum(sqr(a), 1)
@@ -445,7 +445,7 @@ function pairwise!(r::Matrix, dist::SqEuclidean, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::SqEuclidean, a::Matrix)
+function pairwise!(r::AbstractMatrix, dist::SqEuclidean, a::AbstractMatrix)
 	m, n = get_pairwise_dims(r, a)
 	At_mul_B(r, a, a)
 	@devec sa2 = sum(sqr(a), 1)
@@ -462,19 +462,19 @@ end
 
 # Euclidean
 
-function evaluate(dist::Euclidean, a::Vector, b::Vector)
+function evaluate(dist::Euclidean, a::AbstractVector, b::AbstractVector)
 	@devec r = sum(sqr(a - b))
 	return sqrt(r)
 end
 
-euclidean(a::Vector, b::Vector) = evaluate(Euclidean(), a, b)
+euclidean(a::AbstractVector, b::AbstractVector) = evaluate(Euclidean(), a, b)
 
-function colwise!(r::Array, dist::Euclidean, a::Matrix, b::Matrix)
+function colwise!(r::AbstractArray, dist::Euclidean, a::AbstractMatrix, b::AbstractMatrix)
 	get_colwise_dims(r, a, b)
 	@devec r[:] = sqrt(sum(sqr(a - b), 1))
 end
 
-function colwise!(r::Array, dist::Euclidean, a::Vector, b::Matrix)
+function colwise!(r::AbstractArray, dist::Euclidean, a::AbstractVector, b::AbstractMatrix)
 	m, n = get_colwise_dims(r, a, b)
 	for j = 1 : n
 		@devec r[j] = sum(sqr(a - b[:,j]))
@@ -482,7 +482,7 @@ function colwise!(r::Array, dist::Euclidean, a::Vector, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::Euclidean, a::Matrix, b::Matrix)
+function pairwise!(r::AbstractMatrix, dist::Euclidean, a::AbstractMatrix, b::AbstractMatrix)
 	m, na, nb = get_pairwise_dims(r, a, b)
 	At_mul_B(r, a, b)
 	@devec sa2 = sum(sqr(a), 1)
@@ -495,7 +495,7 @@ function pairwise!(r::Matrix, dist::Euclidean, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::Euclidean, a::Matrix)
+function pairwise!(r::AbstractMatrix, dist::Euclidean, a::AbstractMatrix)
 	m, n = get_pairwise_dims(r, a)
 	At_mul_B(r, a, a)
 	@devec sa2 = sum(sqr(a), 1)
@@ -514,26 +514,26 @@ end
 
 # Cityblock
 
-function evaluate(dist::Cityblock, a::Vector, b::Vector)
+function evaluate(dist::Cityblock, a::AbstractVector, b::AbstractVector)
 	@devec r = sum(abs(a - b))
 	return r
 end
 
-cityblock(a::Vector, b::Vector) = evaluate(Cityblock(), a, b)
+cityblock(a::AbstractVector, b::AbstractVector) = evaluate(Cityblock(), a, b)
 
-function colwise!(r::Array, dist::Cityblock, a::Matrix, b::Matrix)
+function colwise!(r::AbstractArray, dist::Cityblock, a::AbstractMatrix, b::AbstractMatrix)
 	get_colwise_dims(r, a, b)
 	@devec r[:] = sum(abs(a - b), 1)
 end
 
-function colwise!(r::Array, dist::Cityblock, a::Vector, b::Matrix)
+function colwise!(r::AbstractArray, dist::Cityblock, a::AbstractVector, b::AbstractMatrix)
 	m, n = get_colwise_dims(r, a, b)
 	for j = 1 : n
 		@devec r[j] = sum(abs(a - b[:,j]))
 	end
 end
 
-function pairwise!(r::Matrix, dist::Cityblock, a::Matrix, b::Matrix)
+function pairwise!(r::AbstractMatrix, dist::Cityblock, a::AbstractMatrix, b::AbstractMatrix)
 	m, na, nb = get_pairwise_dims(r, a, b)
 	for j = 1 : nb
 		for i = 1 : na
@@ -542,7 +542,7 @@ function pairwise!(r::Matrix, dist::Cityblock, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::Cityblock, a::Matrix)
+function pairwise!(r::AbstractMatrix, dist::Cityblock, a::AbstractMatrix)
 	m, n = get_pairwise_dims(r, a)
 	for j = 1 : n
 		for i = 1 : j-1
@@ -558,26 +558,26 @@ end
 
 # Chebyshev
 
-function evaluate(dist::Chebyshev, a::Vector, b::Vector)
+function evaluate(dist::Chebyshev, a::AbstractVector, b::AbstractVector)
 	@devec r = max(abs(a - b))
 	return r
 end
 
-chebyshev(a::Vector, b::Vector) = evaluate(Chebyshev(), a, b)
+chebyshev(a::AbstractVector, b::AbstractVector) = evaluate(Chebyshev(), a, b)
 
-function colwise!(r::Array, dist::Chebyshev, a::Matrix, b::Matrix)
+function colwise!(r::AbstractArray, dist::Chebyshev, a::AbstractMatrix, b::AbstractMatrix)
 	get_colwise_dims(r, a, b)
 	@devec r[:] = max(abs(a - b), (), 1)
 end
 
-function colwise!(r::Array, dist::Chebyshev, a::Vector, b::Matrix)
+function colwise!(r::AbstractArray, dist::Chebyshev, a::AbstractVector, b::AbstractMatrix)
 	get_colwise_dims(r, a, b)
 	for j = 1 : size(b, 2)
 		@devec r[j] = max(abs(a - b[:,j]))
 	end
 end
 
-function pairwise!(r::Matrix, dist::Chebyshev, a::Matrix, b::Matrix)
+function pairwise!(r::AbstractMatrix, dist::Chebyshev, a::AbstractMatrix, b::AbstractMatrix)
 	m, na, nb = get_pairwise_dims(r, a, b)
 	for j = 1 : nb
 		for i = 1 : na
@@ -586,7 +586,7 @@ function pairwise!(r::Matrix, dist::Chebyshev, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::Chebyshev, a::Matrix)
+function pairwise!(r::AbstractMatrix, dist::Chebyshev, a::AbstractMatrix)
 	m, n = get_pairwise_dims(r, a)
 	for j = 1 : n
 		for i = 1 : j-1
@@ -602,22 +602,22 @@ end
 
 # Minkowski
 
-function evaluate(dist::Minkowski, a::Vector, b::Vector)
+function evaluate(dist::Minkowski, a::AbstractVector, b::AbstractVector)
 	p = dist.p
 	@devec r = sum(abs(a - b) .^ p)
 	return r ^ (1 / p)
 end
 
-minkowski(a::Vector, b::Vector, p::Real) = evaluate(Minkowski(p), a, b)
+minkowski(a::AbstractVector, b::AbstractVector, p::Real) = evaluate(Minkowski(p), a, b)
 
-function colwise!(r::Array, dist::Minkowski, a::Matrix, b::Matrix)
+function colwise!(r::AbstractArray, dist::Minkowski, a::AbstractMatrix, b::AbstractMatrix)
 	get_colwise_dims(r, a, b)
 	p = dist.p
 	inv_p = 1 / p
 	@devec r[:] = sum(abs(a - b) .^ p, 1) .^ inv_p
 end
 
-function colwise!(r::Array, dist::Minkowski, a::Vector, b::Matrix)
+function colwise!(r::AbstractArray, dist::Minkowski, a::AbstractVector, b::AbstractMatrix)
 	m, n = get_colwise_dims(r, a, b)
 	p = dist.p
 	inv_p = 1 / p
@@ -628,7 +628,7 @@ function colwise!(r::Array, dist::Minkowski, a::Vector, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::Minkowski, a::Matrix, b::Matrix)
+function pairwise!(r::AbstractMatrix, dist::Minkowski, a::AbstractMatrix, b::AbstractMatrix)
 	m, na, nb = get_pairwise_dims(r, a, b)
 	p = dist.p
 	inv_p = 1 / p
@@ -641,7 +641,7 @@ function pairwise!(r::Matrix, dist::Minkowski, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::Minkowski, a::Matrix)
+function pairwise!(r::AbstractMatrix, dist::Minkowski, a::AbstractMatrix)
 	m, n = get_pairwise_dims(r, a)
 	p = dist.p
 	inv_p = 1 / p
@@ -661,7 +661,7 @@ end
 
 # Hamming
 
-function evaluate(dist::Hamming, a::Vector, b::Vector)
+function evaluate(dist::Hamming, a::AbstractVector, b::AbstractVector)
 	n = length(a)
 	if n != length(b)
 		throw(ArgumentError("The length of a and b must match."))
@@ -676,9 +676,9 @@ function evaluate(dist::Hamming, a::Vector, b::Vector)
 	return r
 end
 
-hamming(a::Vector, b::Vector) = evaluate(Hamming(), a, b)
+hamming(a::AbstractVector, b::AbstractVector) = evaluate(Hamming(), a, b)
 
-function colwise!(r::Array, dist::Hamming, a::Matrix, b::Matrix)
+function colwise!(r::AbstractArray, dist::Hamming, a::AbstractMatrix, b::AbstractMatrix)
 	m, n = get_colwise_dims(r, a, b)
 	for j = 1 : n
 		d::Int = 0
@@ -691,7 +691,7 @@ function colwise!(r::Array, dist::Hamming, a::Matrix, b::Matrix)
 	end
 end
 
-function colwise!(r::Array, dist::Hamming, a::Vector, b::Matrix)
+function colwise!(r::AbstractArray, dist::Hamming, a::AbstractVector, b::AbstractMatrix)
 	m, n = get_colwise_dims(r, a, b)
 	for j = 1 : n
 		d::Int = 0
@@ -704,7 +704,7 @@ function colwise!(r::Array, dist::Hamming, a::Vector, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::Hamming, a::Matrix, b::Matrix)
+function pairwise!(r::AbstractMatrix, dist::Hamming, a::AbstractMatrix, b::AbstractMatrix)
 	m, na, nb = get_pairwise_dims(r, a, b)
 	for j = 1 : nb
 		for i = 1 : na
@@ -719,7 +719,7 @@ function pairwise!(r::Matrix, dist::Hamming, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::Hamming, a::Matrix)
+function pairwise!(r::AbstractMatrix, dist::Hamming, a::AbstractMatrix)
 	m, n = get_pairwise_dims(r, a)
 	for j = 1 : n
 		for i = 1 : j-1
@@ -741,13 +741,13 @@ end
 
 # Cosine dist
 
-function evaluate(dist::CosineDist, a::Vector, b::Vector)
+function evaluate(dist::CosineDist, a::AbstractVector, b::AbstractVector)
 	max(1 - dot(a, b) / (norm(a) * norm(b)), 0)
 end
 
-cosine_dist(a::Vector, b::Vector) = evaluate(CosineDist(), a, b)
+cosine_dist(a::AbstractVector, b::AbstractVector) = evaluate(CosineDist(), a, b)
 
-function colwise!(r::Array, dist::CosineDist, a::Matrix, b::Matrix)
+function colwise!(r::AbstractArray, dist::CosineDist, a::AbstractMatrix, b::AbstractMatrix)
 	get_colwise_dims(r, a, b)
 	@devec begin
 		ra = sum(sqr(a), 1)
@@ -759,7 +759,7 @@ function colwise!(r::Array, dist::CosineDist, a::Matrix, b::Matrix)
 	end
 end
 
-function colwise!(r::Array, dist::CosineDist, a::Vector, b::Matrix)
+function colwise!(r::AbstractArray, dist::CosineDist, a::AbstractVector, b::AbstractMatrix)
 	get_colwise_dims(r, a, b)
 	@devec begin
 		ra = sqrt(sum(sqr(a)))
@@ -770,7 +770,7 @@ function colwise!(r::Array, dist::CosineDist, a::Vector, b::Matrix)
 	@devec r[:] = max(1 - ab ./ (ra .* rb), 0)
 end
 
-function pairwise!(r::Matrix, dist::CosineDist, a::Matrix, b::Matrix)
+function pairwise!(r::AbstractMatrix, dist::CosineDist, a::AbstractMatrix, b::AbstractMatrix)
 	m, na, nb = get_pairwise_dims(r, a, b)
 	At_mul_B(r, a, b)
 	@devec begin
@@ -786,7 +786,7 @@ function pairwise!(r::Matrix, dist::CosineDist, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::CosineDist, a::Matrix)
+function pairwise!(r::AbstractMatrix, dist::CosineDist, a::AbstractMatrix)
 	m, n = get_pairwise_dims(r, a)
 	At_mul_B(r, a, a)
 	@devec begin
@@ -806,13 +806,13 @@ end
 
 # Correlation Dist
 
-function evaluate(dist::CorrDist, a::Vector, b::Vector)
+function evaluate(dist::CorrDist, a::AbstractVector, b::AbstractVector)
 	cosine_dist(a - mean(a), b - mean(b))
 end
 
-corr_dist(a::Vector, b::Vector) = evaluate(CorrDist(), a, b)
+corr_dist(a::AbstractVector, b::AbstractVector) = evaluate(CorrDist(), a, b)
 
-function shift_vecs_forcorr(a::Matrix)
+function shift_vecs_forcorr(a::AbstractMatrix)
 	@devec am = mean(a, 1)
 	r = similar(a)
 	for j = 1 : size(a, 2)
@@ -821,25 +821,25 @@ function shift_vecs_forcorr(a::Matrix)
 	return r
 end
 
-function colwise!(r::Array, dist::CorrDist, a::Matrix, b::Matrix)
+function colwise!(r::AbstractArray, dist::CorrDist, a::AbstractMatrix, b::AbstractMatrix)
 	a_ = shift_vecs_forcorr(a)
 	b_ = shift_vecs_forcorr(b)
 	colwise!(r, CosineDist(), a_, b_)
 end
 
-function colwise!(r::Array, dist::CorrDist, a::Vector, b::Matrix)
+function colwise!(r::AbstractArray, dist::CorrDist, a::AbstractVector, b::AbstractMatrix)
 	a_ = a - mean(a)
 	b_ = shift_vecs_forcorr(b)
 	colwise!(r, CosineDist(), a_, b_)
 end
 
-function pairwise!(r::Matrix, dist::CorrDist, a::Matrix, b::Matrix)
+function pairwise!(r::AbstractMatrix, dist::CorrDist, a::AbstractMatrix, b::AbstractMatrix)
 	a_ = shift_vecs_forcorr(a)
 	b_ = shift_vecs_forcorr(b)
 	pairwise!(r, CosineDist(), a_, b_)
 end
 
-function pairwise!(r::Matrix, dist::CorrDist, a::Matrix)
+function pairwise!(r::AbstractMatrix, dist::CorrDist, a::AbstractMatrix)
 	a_ = shift_vecs_forcorr(a)
 	pairwise!(r, CosineDist(), a_)
 end
@@ -847,26 +847,26 @@ end
 
 # Chi-square distance
 
-function evaluate(dist::ChiSqDist, a::Vector, b::Vector)
+function evaluate(dist::ChiSqDist, a::AbstractVector, b::AbstractVector)
 	@devec r = sum(sqr(a - b) ./ (a + b))
 	return r
 end
 
-chisq_dist(a::Vector, b::Vector) = evaluate(ChiSqDist(), a, b)
+chisq_dist(a::AbstractVector, b::AbstractVector) = evaluate(ChiSqDist(), a, b)
 
-function colwise!(r::Array, dist::ChiSqDist, a::Matrix, b::Matrix)
+function colwise!(r::AbstractArray, dist::ChiSqDist, a::AbstractMatrix, b::AbstractMatrix)
 	get_colwise_dims(r, a, b)
 	@devec r[:] = sum(sqr(a - b) ./ (a + b), 1)
 end
 
-function colwise!(r::Array, dist::ChiSqDist, a::Vector, b::Matrix)
+function colwise!(r::AbstractArray, dist::ChiSqDist, a::AbstractVector, b::AbstractMatrix)
 	get_colwise_dims(r, a, b)
 	for j = 1 : size(b, 2)
 		@devec r[j] = sum(sqr(a - b[:,j]) ./ (a + b[:,j]))
 	end
 end
 
-function pairwise!(r::Matrix, dist::ChiSqDist, a::Matrix, b::Matrix)
+function pairwise!(r::AbstractMatrix, dist::ChiSqDist, a::AbstractMatrix, b::AbstractMatrix)
 	m, na, nb = get_pairwise_dims(r, a, b)
 	m = size(a, 2)
 	n = size(b, 2)
@@ -877,7 +877,7 @@ function pairwise!(r::Matrix, dist::ChiSqDist, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::ChiSqDist, a::Matrix)
+function pairwise!(r::AbstractMatrix, dist::ChiSqDist, a::AbstractMatrix)
 	m, n = get_pairwise_dims(r, a)
 	for j = 1 : n
 		for i = 1 : j-1
@@ -893,7 +893,7 @@ end
 
 # KL divergence
 
-function evaluate(dist::KLDivergence, a::Vector, b::Vector)
+function evaluate(dist::KLDivergence, a::AbstractVector, b::AbstractVector)
 	r = zero(promote_type(eltype(a), eltype(b)))
 	n = length(a)
 	if n != length(b)
@@ -907,9 +907,9 @@ function evaluate(dist::KLDivergence, a::Vector, b::Vector)
 	return r
 end
 
-kl_divergence(a::Vector, b::Vector) = evaluate(KLDivergence(), a, b)
+kl_divergence(a::AbstractVector, b::AbstractVector) = evaluate(KLDivergence(), a, b)
 
-function colwise!(r::Array, dist::KLDivergence, a::Matrix, b::Matrix)
+function colwise!(r::AbstractArray, dist::KLDivergence, a::AbstractMatrix, b::AbstractMatrix)
 	m, n = get_colwise_dims(r, a, b)
 	T = zero(promote_type(eltype(a), eltype(b)))
 	for j = 1 : n
@@ -924,7 +924,7 @@ function colwise!(r::Array, dist::KLDivergence, a::Matrix, b::Matrix)
 	end
 end
 
-function colwise!(r::Array, dist::KLDivergence, a::Vector, b::Matrix)
+function colwise!(r::AbstractArray, dist::KLDivergence, a::AbstractVector, b::AbstractMatrix)
 	m, n = get_colwise_dims(r, a, b)
 	T = zero(promote_type(eltype(a), eltype(b)))
 	for j = 1 : n
@@ -940,7 +940,7 @@ function colwise!(r::Array, dist::KLDivergence, a::Vector, b::Matrix)
 end
 
 
-function colwise!(r::Array, dist::KLDivergence, a::Matrix, b::Vector)
+function colwise!(r::AbstractArray, dist::KLDivergence, a::AbstractMatrix, b::AbstractVector)
 	m, n = get_colwise_dims(r, a, b)
 	T = zero(promote_type(eltype(a), eltype(b)))
 	for j = 1 : n
@@ -956,7 +956,7 @@ function colwise!(r::Array, dist::KLDivergence, a::Matrix, b::Vector)
 end
 
 
-function pairwise!(r::Matrix, dist::KLDivergence, a::Matrix, b::Matrix)
+function pairwise!(r::AbstractMatrix, dist::KLDivergence, a::AbstractMatrix, b::AbstractMatrix)
 	m, na, nb = get_pairwise_dims(r, a, b)
 	T = zero(promote_type(eltype(a), eltype(b)))
 	for j = 1 : nb
@@ -973,14 +973,14 @@ function pairwise!(r::Matrix, dist::KLDivergence, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::KLDivergence, a::Matrix)
+function pairwise!(r::AbstractMatrix, dist::KLDivergence, a::AbstractMatrix)
 	pairwise!(r, dist, a, a)  # K-L divergence is not symmetric
 end
 
 
 # JS divergence
 
-function evaluate(dist::JSDivergence, a::Vector, b::Vector)
+function evaluate(dist::JSDivergence, a::AbstractVector, b::AbstractVector)
 	r = zero(promote_type(eltype(a), eltype(b)))
 	n = length(a)
 	if n != length(b)
@@ -998,9 +998,9 @@ function evaluate(dist::JSDivergence, a::Vector, b::Vector)
 	return r
 end
 
-js_divergence(a::Vector, b::Vector) = evaluate(JSDivergence(), a, b)
+js_divergence(a::AbstractVector, b::AbstractVector) = evaluate(JSDivergence(), a, b)
 
-function colwise!(r::Array, dist::JSDivergence, a::Matrix, b::Matrix)
+function colwise!(r::AbstractArray, dist::JSDivergence, a::AbstractMatrix, b::AbstractMatrix)
 	m, n = get_colwise_dims(r, a, b)
 	T = zero(promote_type(eltype(a), eltype(b)))
 	for j = 1 : n
@@ -1018,7 +1018,7 @@ function colwise!(r::Array, dist::JSDivergence, a::Matrix, b::Matrix)
 	end
 end
 
-function colwise!(r::Array, dist::JSDivergence, a::Vector, b::Matrix)
+function colwise!(r::AbstractArray, dist::JSDivergence, a::AbstractVector, b::AbstractMatrix)
 	m, n = get_colwise_dims(r, a, b)
 	T = zero(promote_type(eltype(a), eltype(b)))
 	for j = 1 : n
@@ -1036,7 +1036,7 @@ function colwise!(r::Array, dist::JSDivergence, a::Vector, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::JSDivergence, a::Matrix, b::Matrix)
+function pairwise!(r::AbstractMatrix, dist::JSDivergence, a::AbstractMatrix, b::AbstractMatrix)
 	m, na, nb = get_pairwise_dims(r, a, b)
 	T = zero(promote_type(eltype(a), eltype(b)))
 	for j = 1 : nb
@@ -1056,7 +1056,7 @@ function pairwise!(r::Matrix, dist::JSDivergence, a::Matrix, b::Matrix)
 	end
 end
 
-function pairwise!(r::Matrix, dist::JSDivergence, a::Matrix)
+function pairwise!(r::AbstractMatrix, dist::JSDivergence, a::AbstractMatrix)
 	m, n = get_pairwise_dims(r, a)
 	T = eltype(a)
 	for j = 1 : n
@@ -1083,15 +1083,15 @@ end
 
 # Weighted squared Euclidean
 
-function evaluate{T<:FloatingPoint}(dist::WeightedSqEuclidean{T}, a::Vector, b::Vector)
+function evaluate{T<:FloatingPoint}(dist::WeightedSqEuclidean{T}, a::AbstractVector, b::AbstractVector)
 	w = dist.weights
 	@devec r = sum(sqr(a - b) .* w)
 	return r
 end
 
-sqeuclidean(a::Vector, b::Vector, w::Vector) = evaluate(WeightedSqEuclidean(w), a, b)
+sqeuclidean(a::AbstractVector, b::AbstractVector, w::AbstractVector) = evaluate(WeightedSqEuclidean(w), a, b)
 
-function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedSqEuclidean{T}, a::Matrix, b::Matrix)
+function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::WeightedSqEuclidean{T}, a::AbstractMatrix, b::AbstractMatrix)
 	w = dist.weights
 	m, n = get_colwise_dims(length(w), r, a, b)
 	for j = 1 : n
@@ -1099,7 +1099,7 @@ function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedSqEuclidean{T}, a::M
 	end
 end
 
-function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedSqEuclidean{T}, a::Vector, b::Matrix)
+function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::WeightedSqEuclidean{T}, a::AbstractVector, b::AbstractMatrix)
 	w = dist.weights
 	m, n = get_colwise_dims(length(w), r, a, b)
 	for j = 1 : n
@@ -1107,7 +1107,7 @@ function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedSqEuclidean{T}, a::V
 	end
 end
 
-function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedSqEuclidean{T}, a::Matrix, b::Matrix)
+function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedSqEuclidean{T}, a::AbstractMatrix, b::AbstractMatrix)
 	w = dist.weights
 	m, na, nb = get_pairwise_dims(length(w), r, a, b)
 	
@@ -1128,7 +1128,7 @@ function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedSqEuclidean{T}, a:
 	end
 end
 
-function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedSqEuclidean{T}, a::Matrix)
+function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedSqEuclidean{T}, a::AbstractMatrix)
 	w = dist.weights
 	m, n = get_pairwise_dims(length(w), r, a)
 	
@@ -1152,43 +1152,43 @@ end
 
 # Weighted Euclidean
 
-function evaluate{T<:FloatingPoint}(dist::WeightedEuclidean{T}, a::Vector, b::Vector)
+function evaluate{T<:FloatingPoint}(dist::WeightedEuclidean{T}, a::AbstractVector, b::AbstractVector)
 	sqrt(evaluate(WeightedSqEuclidean(dist.weights), a, b))
 end
 
-euclidean(a::Vector, b::Vector, w::Vector) = evaluate(WeightedEuclidean(w), a, b)
+euclidean(a::AbstractVector, b::AbstractVector, w::AbstractVector) = evaluate(WeightedEuclidean(w), a, b)
 
-function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedEuclidean{T}, a::Matrix, b::Matrix)
+function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::WeightedEuclidean{T}, a::AbstractMatrix, b::AbstractMatrix)
 	colwise!(r, WeightedSqEuclidean(dist.weights), a, b)
 	@devec r[:] = sqrt(r)
 end
 
-function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedEuclidean{T}, a::Vector, b::Matrix)
+function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::WeightedEuclidean{T}, a::AbstractVector, b::AbstractMatrix)
 	colwise!(r, WeightedSqEuclidean(dist.weights), a, b)
 	@devec r[:] = sqrt(r)
 end
 
-function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedEuclidean{T}, a::Matrix, b::Matrix)
+function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedEuclidean{T}, a::AbstractMatrix, b::AbstractMatrix)
 	pairwise!(r, WeightedSqEuclidean(dist.weights), a, b)
 	@devec r[:] = sqrt(max(r, 0))
 end
 
-function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedEuclidean{T}, a::Matrix)
+function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedEuclidean{T}, a::AbstractMatrix)
 	pairwise!(r, WeightedSqEuclidean(dist.weights), a)
 	@devec r[:] = sqrt(max(r, 0))
 end
 
 # Weighted Cityblock
 
-function evaluate{T<:FloatingPoint}(dist::WeightedCityblock{T}, a::Vector, b::Vector)
+function evaluate{T<:FloatingPoint}(dist::WeightedCityblock{T}, a::AbstractVector, b::AbstractVector)
 	w = dist.weights
 	@devec r = sum(abs(a - b) .* w)
 	return r
 end
 
-cityblock(a::Vector, b::Vector, w::Vector) = evaluate(WeightedCityblock(w), a, b)
+cityblock(a::AbstractVector, b::AbstractVector, w::AbstractVector) = evaluate(WeightedCityblock(w), a, b)
 
-function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedCityblock{T}, a::Matrix, b::Matrix)
+function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::WeightedCityblock{T}, a::AbstractMatrix, b::AbstractMatrix)
 	w = dist.weights
 	m, n = get_colwise_dims(length(w), r, a, b)
 	for j = 1 : n
@@ -1196,7 +1196,7 @@ function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedCityblock{T}, a::Mat
 	end
 end
 
-function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedCityblock{T}, a::Vector, b::Matrix)
+function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::WeightedCityblock{T}, a::AbstractVector, b::AbstractMatrix)
 	w = dist.weights
 	m, n = get_colwise_dims(length(w), r, a, b)	
 	for j = 1 : n
@@ -1204,7 +1204,7 @@ function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedCityblock{T}, a::Vec
 	end
 end
 
-function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedCityblock{T}, a::Matrix, b::Matrix)
+function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedCityblock{T}, a::AbstractMatrix, b::AbstractMatrix)
 	w = dist.weights
 	m, na, nb = get_pairwise_dims(length(w), r, a, b)	
 	for j = 1 : nb
@@ -1214,7 +1214,7 @@ function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedCityblock{T}, a::M
 	end
 end
 
-function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedCityblock{T}, a::Matrix)
+function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedCityblock{T}, a::AbstractMatrix)
 	w = dist.weights
 	m, n = get_pairwise_dims(length(w), r, a)	
 	for j = 1 : n
@@ -1231,16 +1231,16 @@ end
 
 # WeightedMinkowski
 
-function evaluate{T<:FloatingPoint}(dist::WeightedMinkowski{T}, a::Vector, b::Vector)
+function evaluate{T<:FloatingPoint}(dist::WeightedMinkowski{T}, a::AbstractVector, b::AbstractVector)
 	p = dist.p
 	w = dist.weights
 	@devec r = sum((abs(a - b) .^ p) .* w)
 	return r ^ (1 / p)
 end
 
-minkowski(a::Vector, b::Vector, w::Vector, p::Real) = evaluate(WeightedMinkowski(w, p), a, b)
+minkowski(a::AbstractVector, b::AbstractVector, w::AbstractVector, p::Real) = evaluate(WeightedMinkowski(w, p), a, b)
 
-function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedMinkowski{T}, a::Matrix, b::Matrix)
+function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::WeightedMinkowski{T}, a::AbstractMatrix, b::AbstractMatrix)
 	w = dist.weights
 	m, n = get_colwise_dims(length(w), r, a, b)
 	p = dist.p
@@ -1251,7 +1251,7 @@ function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedMinkowski{T}, a::Mat
 	end
 end
 
-function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedMinkowski{T}, a::Vector, b::Matrix)
+function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::WeightedMinkowski{T}, a::AbstractVector, b::AbstractMatrix)
 	w = dist.weights
 	m, n = get_colwise_dims(length(w), r, a, b)
 	p = dist.p
@@ -1263,7 +1263,7 @@ function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedMinkowski{T}, a::Vec
 	end
 end
 
-function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedMinkowski{T}, a::Matrix, b::Matrix)
+function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedMinkowski{T}, a::AbstractMatrix, b::AbstractMatrix)
 	w = dist.weights
 	m, na, nb = get_pairwise_dims(length(w), r, a, b)
 	p = dist.p
@@ -1277,7 +1277,7 @@ function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedMinkowski{T}, a::M
 	end
 end
 
-function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedMinkowski{T}, a::Matrix)
+function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedMinkowski{T}, a::AbstractMatrix)
 	w = dist.weights
 	m, n = get_pairwise_dims(r, a)
 	p = dist.p
@@ -1298,7 +1298,7 @@ end
 
 # WeightedHamming
 
-function evaluate{T<:FloatingPoint}(dist::WeightedHamming{T}, a::Vector, b::Vector)
+function evaluate{T<:FloatingPoint}(dist::WeightedHamming{T}, a::AbstractVector, b::AbstractVector)
 	n = length(a)
 	if n != length(b)
 		throw(ArgumentError("The lengths of a and b must match."))
@@ -1314,9 +1314,9 @@ function evaluate{T<:FloatingPoint}(dist::WeightedHamming{T}, a::Vector, b::Vect
 	return r
 end
 
-hamming(a::Vector, b::Vector, w::Vector) = evaluate(WeightedHamming(w), a, b)
+hamming(a::AbstractVector, b::AbstractVector, w::AbstractVector) = evaluate(WeightedHamming(w), a, b)
 
-function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedHamming{T}, a::Matrix, b::Matrix)
+function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::WeightedHamming{T}, a::AbstractMatrix, b::AbstractMatrix)
 	w = dist.weights
 	m, n = get_colwise_dims(length(w), r, a, b)
 	for j = 1 : n
@@ -1330,7 +1330,7 @@ function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedHamming{T}, a::Matri
 	end
 end
 
-function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedHamming{T}, a::Vector, b::Matrix)
+function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::WeightedHamming{T}, a::AbstractVector, b::AbstractMatrix)
 	w = dist.weights
 	m, n = get_colwise_dims(length(w), r, a, b)
 	for j = 1 : n
@@ -1344,7 +1344,7 @@ function colwise!{T<:FloatingPoint}(r::Array, dist::WeightedHamming{T}, a::Vecto
 	end
 end
 
-function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedHamming{T}, a::Matrix, b::Matrix)
+function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedHamming{T}, a::AbstractMatrix, b::AbstractMatrix)
 	w = dist.weights
 	m, na, nb = get_pairwise_dims(length(w), r, a, b)
 	for j = 1 : nb
@@ -1360,7 +1360,7 @@ function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedHamming{T}, a::Mat
 	end
 end
 
-function pairwise!{T<:FloatingPoint}(r::Matrix, dist::WeightedHamming{T}, a::Matrix)
+function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedHamming{T}, a::AbstractMatrix)
 	w = dist.weights
 	m, n = get_pairwise_dims(r, a)
 	for j = 1 : n
@@ -1383,15 +1383,15 @@ end
 
 # SqMahalanobis
 
-function evaluate{T<:FloatingPoint}(dist::SqMahalanobis{T}, a::Vector, b::Vector)
+function evaluate{T<:FloatingPoint}(dist::SqMahalanobis{T}, a::AbstractVector, b::AbstractVector)
 	Q = dist.qmat
 	z = a - b
 	return dot(z, Q * z)
 end
 
-sqmahalanobis(a::Vector, b::Vector, Q::Matrix) = evaluate(SqMahalanobis(Q), a, b)
+sqmahalanobis(a::AbstractVector, b::AbstractVector, Q::AbstractMatrix) = evaluate(SqMahalanobis(Q), a, b)
 
-function colwise!{T<:FloatingPoint}(r::Array, dist::SqMahalanobis{T}, a::Matrix, b::Matrix)
+function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::SqMahalanobis{T}, a::AbstractMatrix, b::AbstractMatrix)
 	Q = dist.qmat
 	m, n = get_colwise_dims(size(Q, 1), r, a, b)
 	z = a - b
@@ -1399,7 +1399,7 @@ function colwise!{T<:FloatingPoint}(r::Array, dist::SqMahalanobis{T}, a::Matrix,
 	@devec r[:] = sum(Qz .* z, 1)
 end
 
-function colwise!{T<:FloatingPoint}(r::Array, dist::SqMahalanobis{T}, a::Vector, b::Matrix)
+function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::SqMahalanobis{T}, a::AbstractVector, b::AbstractMatrix)
 	Q = dist.qmat
 	m, n = get_colwise_dims(size(Q, 1), r, a, b)
 	z = Array(T, (m, n))
@@ -1410,7 +1410,7 @@ function colwise!{T<:FloatingPoint}(r::Array, dist::SqMahalanobis{T}, a::Vector,
 	@devec r[:] = sum(Qz .* z, 1)
 end
 
-function pairwise!{T<:FloatingPoint}(r::Matrix, dist::SqMahalanobis{T}, a::Matrix, b::Matrix)
+function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::SqMahalanobis{T}, a::AbstractMatrix, b::AbstractMatrix)
 	Q = dist.qmat
 	m, na, nb = get_pairwise_dims(size(Q, 1), r, a, b)
 	
@@ -1427,7 +1427,7 @@ function pairwise!{T<:FloatingPoint}(r::Matrix, dist::SqMahalanobis{T}, a::Matri
 	end
 end
 
-function pairwise!{T<:FloatingPoint}(r::Matrix, dist::SqMahalanobis{T}, a::Matrix)
+function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::SqMahalanobis{T}, a::AbstractMatrix)
 	Q = dist.qmat
 	m, n = get_pairwise_dims(size(Q, 1), r, a)
 	
@@ -1449,28 +1449,28 @@ end
 
 # Mahalanobis
 
-function evaluate{T<:FloatingPoint}(dist::Mahalanobis{T}, a::Vector, b::Vector)
+function evaluate{T<:FloatingPoint}(dist::Mahalanobis{T}, a::AbstractVector, b::AbstractVector)
 	sqrt(evaluate(SqMahalanobis(dist.qmat), a, b))
 end
 
-mahalanobis(a::Vector, b::Vector, Q::Matrix) = evaluate(Mahalanobis(Q), a, b)
+mahalanobis(a::AbstractVector, b::AbstractVector, Q::AbstractMatrix) = evaluate(Mahalanobis(Q), a, b)
 
-function colwise!{T<:FloatingPoint}(r::Array, dist::Mahalanobis{T}, a::Matrix, b::Matrix)
+function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::Mahalanobis{T}, a::AbstractMatrix, b::AbstractMatrix)
 	colwise!(r, SqMahalanobis(dist.qmat), a, b)
 	@devec r[:] = sqrt(r)
 end
 
-function colwise!{T<:FloatingPoint}(r::Array, dist::Mahalanobis{T}, a::Vector, b::Matrix)
+function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::Mahalanobis{T}, a::AbstractVector, b::AbstractMatrix)
 	colwise!(r, SqMahalanobis(dist.qmat), a, b)
 	@devec r[:] = sqrt(r)
 end
 
-function pairwise!{T<:FloatingPoint}(r::Matrix, dist::Mahalanobis{T}, a::Matrix, b::Matrix)
+function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::Mahalanobis{T}, a::AbstractMatrix, b::AbstractMatrix)
 	pairwise!(r, SqMahalanobis(dist.qmat), a, b)
 	@devec r[:] = sqrt(max(r, 0))
 end
 
-function pairwise!{T<:FloatingPoint}(r::Matrix, dist::Mahalanobis{T}, a::Matrix)
+function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::Mahalanobis{T}, a::AbstractMatrix)
 	pairwise!(r, SqMahalanobis(dist.qmat), a)
 	@devec r[:] = sqrt(max(r, 0))
 end
