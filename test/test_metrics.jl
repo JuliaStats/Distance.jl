@@ -80,6 +80,15 @@ w = rand(size(a))
 @test weighted_hamming(a, a, w) == 0.
 @test weighted_hamming(a, b, w) == sum((a .!= b) .* w)
 
+Q = rand(length(x), length(x))
+Q = Q * Q'  # make sure Q is positive-definite
+
+@test sqmahalanobis(x, x, Q) == 0.
+@test is_approx(sqmahalanobis(x, y, Q), dot(x - y, Q * (x - y)), 1.0e-14)
+
+@test mahalanobis(x, x, Q) == 0.
+@test mahalanobis(x, y, Q) == sqrt(sqmahalanobis(x, y, Q))
+
 
 # test column-wise metrics
 
@@ -133,6 +142,12 @@ w = rand(m)
 @test_colwise WeightedMinkowski(w, 2.5) X Y 1.0e-14
 @test_colwise WeightedHamming(w) A B 1.0e-14
 
+Q = rand(m, m)
+Q = Q * Q'  # make sure Q is positive-definite
+
+@test_colwise SqMahalanobis(Q) X Y 1.0e-13
+@test_colwise Mahalanobis(Q) X Y 1.0e-13
+
 
 # test pairwise metrics
 
@@ -185,4 +200,10 @@ w = rand(m)
 @test_pairwise WeightedCityblock(w) X Y 1.0e-14
 @test_pairwise WeightedMinkowski(w, 2.5) X Y 1.0e-14 
 @test_pairwise WeightedHamming(w) A B 1.0e-14
+
+Q = rand(m, m)
+Q = Q * Q'  # make sure Q is positive-definite
+
+@test_pairwise SqMahalanobis(Q) X Y 1.0e-13
+@test_pairwise Mahalanobis(Q) X Y 1.0e-13
 
