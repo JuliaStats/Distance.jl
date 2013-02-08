@@ -135,7 +135,36 @@ Each distance corresponds to a distance type. The type name and the correspondin
 **Note:** The formulas above are using *Julia*'s functions. These formulas are mainly for conveying the math concepts in a concise way. The actual implementation may use a faster way.
 
 
+## Benchmarks
 
 
+The implementation has been carefully optimized based on benchmarks. The Julia scripts ``test/bench_colwise.jl`` and ``test/bench_pairwise.jl`` run the benchmarks on a variety of distances, respectively under column-wise and pairwise settings.
+
+Here are the benchmarks that I obtained on Mac OS X 10.8 with Intel Core i7 2.6 GHz.
+
+#### Column-wise benchmark
+
+The table below compares the performance (measured in terms of average elaped time of each iteration) of a straightforward loop implementation and an optimized implementation provided in *Distance.jl*. The task in each iteration is to compute a specific distance between corresponding columns in two ``200-by-10000`` matrices.
+
+|  distance   |   loop  |   colwise   |   gain     |
+|------------ | --------| ------------| -----------|
+| SqEuclidean | 0.038312 | 0.004708 | 8.1376
+| Euclidean | 0.036947 | 0.004158 | 8.8853
+| Cityblock | 0.037507 | 0.004348 | 8.6263
+| Chebyshev | 0.045246 | 0.012861 | 3.5179
+| Minkowski | 0.418969 | 0.379957 | 1.1027
+| Hamming | 0.035414 | 0.004264 | 8.3046
+| CosineDist | 0.053191 | 0.008009 | 6.6417
+| CorrDist | 0.085048 | 0.035571 | 2.391
+| ChiSqDist | 0.04407 | 0.00839 | 5.2528
+| KLDivergence | 0.071618 | 0.040244 | 1.7796
+| JSDivergence | 0.45729 | 0.417977 | 1.0941
+| WeightedSqEuclidean | 0.040023 | 0.006049 | 6.6165
+| WeightedEuclidean | 0.039938 | 0.005953 | 6.7094
+| WeightedCityblock | 0.038502 | 0.006362 | 6.0517
+| WeightedMinkowski | 0.540418 | 0.510852 | 1.0579
+| WeightedHamming | 0.039012 | 0.004541 | 8.592
+| SqMahalanobis | 0.135427 | 0.040468 | 3.3465
+| Mahalanobis | 0.135613 | 0.04203 | 3.2266
 
 
