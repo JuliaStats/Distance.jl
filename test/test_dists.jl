@@ -1,7 +1,7 @@
 # Unit tests for Distances
 
+using Distance
 using Test
-using Metrics
 
 # helpers
 

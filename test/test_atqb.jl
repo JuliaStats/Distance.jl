@@ -1,6 +1,6 @@
 # Tests of At_Q_B, At_Q_A
 
-using Metrics
+using Distance
 using Test
 
 # helpers

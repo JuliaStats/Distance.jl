@@ -1,4 +1,4 @@
-module Metrics
+module Distance
 	
 using Devectorize
 
