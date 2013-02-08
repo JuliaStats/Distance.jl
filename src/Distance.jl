@@ -784,26 +784,35 @@ end
 
 corr_dist(a::Vector, b::Vector) = evaluate(CorrDist(), a, b)
 
+function shift_vecs_forcorr(a::Matrix)
+	@devec am = mean(a, 1)
+	r = similar(a)
+	for j = 1 : size(a, 2)
+		@devec r[:,j] = a[:,j] - am[j]
+	end
+	return r
+end
+
 function colwise!(r::Array, dist::CorrDist, a::Matrix, b::Matrix)
-	a_ = bsxfun(-, a, mean(a, 1))
-	b_ = bsxfun(-, b, mean(b, 1))
+	a_ = shift_vecs_forcorr(a)
+	b_ = shift_vecs_forcorr(b)
 	colwise!(r, CosineDist(), a_, b_)
 end
 
 function colwise!(r::Array, dist::CorrDist, a::Vector, b::Matrix)
 	a_ = a - mean(a)
-	b_ = bsxfun(-, b, mean(b, 1))
+	b_ = shift_vecs_forcorr(b)
 	colwise!(r, CosineDist(), a_, b_)
 end
 
 function pairwise!(r::Matrix, dist::CorrDist, a::Matrix, b::Matrix)
-	a_ = bsxfun(-, a, mean(a, 1))
-	b_ = bsxfun(-, b, mean(b, 1))
+	a_ = shift_vecs_forcorr(a)
+	b_ = shift_vecs_forcorr(b)
 	pairwise!(r, CosineDist(), a_, b_)
 end
 
 function pairwise!(r::Matrix, dist::CorrDist, a::Matrix)
-	a_ = bsxfun(-, a, mean(a, 1))
+	a_ = shift_vecs_forcorr(a)
 	pairwise!(r, CosineDist(), a_)
 end
 
