@@ -366,19 +366,19 @@ end
 
 
 # faster evaluation by leveraging the properties of semi-metrics
-function pairwise!(r::AbstractMatrix, metric::SemiMetric, a::AbstractMatrix)
+function pairwise!(r::AbstractMatrix, metric::SemiMetric, a::AbstractMatrix, b::AbstractMatrix)
 	n = size(a, 2)
 	if !(size(r) == (n, n))
 		throw(ArgumentError("Incorrect size of r."))
 	end
 	for j = 1 : n
-		for i = 1 : j-1
-			a[i,j] = a[j,i]
-		end
-		a[j,j] = 0
+		r[j,j] = 0
 		bj = b[:,j]
 		for i = j+1 : n
-			a[i,j] = evaluate(metric, a[:,i], bj)
+			r[i,j] = evaluate(metric, a[:,i], bj)
+		end
+		for i = 1 : j-1
+			r[i,j] = r[j,i]
 		end
 	end
 end
