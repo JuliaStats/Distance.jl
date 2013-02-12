@@ -56,6 +56,8 @@ export
 	result_type,
 	colwise,
 	pairwise,
+	colwise!,
+	pairwise!,
 	evaluate,
 	
 	# other convenient functions
