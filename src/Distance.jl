@@ -368,17 +368,21 @@ end
 
 
 # faster evaluation by leveraging the properties of semi-metrics
-function pairwise!(r::AbstractMatrix, metric::SemiMetric, a::AbstractMatrix, b::AbstractMatrix)
+#
+#  this only applies when computing pairwise distances between columns of the same matrix
+#  for pairwise(dist, a, b), it will simply fall back to the one above 
+#
+function pairwise!(r::AbstractMatrix, metric::SemiMetric, a::AbstractMatrix)
 	n = size(a, 2)
 	if !(size(r) == (n, n))
 		throw(ArgumentError("Incorrect size of r."))
 	end
 	for j = 1 : n
-		r[j,j] = 0
-		bj = b[:,j]
+		aj = a[:,j]
 		for i = j+1 : n
-			r[i,j] = evaluate(metric, a[:,i], bj)
+			r[i,j] = evaluate(metric, a[:,i], aj)
 		end
+		r[j,j] = 0
 		for i = 1 : j-1
 			r[i,j] = r[j,i]
 		end
