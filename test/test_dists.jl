@@ -18,7 +18,7 @@ a = [1., 2., 1., 3., 2., 1.]
 b = [1., 3., 0., 2., 2., 0.]
 
 p = rand(12)
-p[p .< 0.3] = 0. 
+p[p .< 0.3] = 0.
 q = rand(12)
 
 @test sqeuclidean(x, x) == 0.
@@ -50,9 +50,9 @@ q = rand(12)
 
 klv = 0.
 for i = 1 : length(p)
-	if p[i] > 0
-		klv += p[i] * log(p[i] / q[i])
-	end
+    if p[i] > 0
+        klv += p[i] * log(p[i] / q[i])
+    end
 end
 @test is_approx(kl_divergence(p, q), klv, 1.0e-14)
 
@@ -104,20 +104,20 @@ Q = rand(m, n)
 P[P .< 0.3] = 0.
 
 macro test_colwise(dist, x, y, tol)
-	quote
-		local n = size($x, 2)
-		r1 = zeros(n)
-		r2 = zeros(n)
-		r3 = zeros(n)
-		for j = 1 : n
-			r1[j] = evaluate($dist, ($x)[:,j], ($y)[:,j])
-			r2[j] = evaluate($dist, ($x)[:,1], ($y)[:,j])
-			r3[j] = evaluate($dist, ($x)[:,j], ($y)[:,1])
-		end 
-		@test all_approx(colwise($dist, $x, $y),        r1, $tol)
-		@test all_approx(colwise($dist, ($x)[:,1], $y), r2, $tol)
-		@test all_approx(colwise($dist, $x, ($y)[:,1]), r3, $tol)
-	end
+    quote
+        local n = size($x, 2)
+        r1 = zeros(n)
+        r2 = zeros(n)
+        r3 = zeros(n)
+        for j = 1 : n
+            r1[j] = evaluate($dist, ($x)[:,j], ($y)[:,j])
+            r2[j] = evaluate($dist, ($x)[:,1], ($y)[:,j])
+            r3[j] = evaluate($dist, ($x)[:,j], ($y)[:,1])
+        end
+        @test all_approx(colwise($dist, $x, $y),        r1, $tol)
+        @test all_approx(colwise($dist, ($x)[:,1], $y), r2, $tol)
+        @test all_approx(colwise($dist, $x, ($y)[:,1]), r3, $tol)
+    end
 end
 
 @test_colwise SqEuclidean() X Y 1.0e-14
@@ -163,20 +163,20 @@ P = rand(m, nx)
 Q = rand(m, ny)
 
 macro test_pairwise(dist, x, y, tol)
-	quote
-		local nx = size($x, 2)
-		local ny = size($y, 2)
-		rxy = zeros(nx, ny)
-		rxx = zeros(nx, nx)
-		for j = 1 : ny, i = 1 : nx
-			rxy[i, j] = evaluate($dist, ($x)[:,i], ($y)[:,j])
-		end
-		for j = 1 : nx, i = 1 : nx
-			rxx[i, j] = evaluate($dist, ($x)[:,i], ($x)[:,j])
-		end
-		@test all_approx(pairwise($dist, $x, $y), rxy, $tol)
-		@test all_approx(pairwise($dist, $x), rxx, $tol)
-	end
+    quote
+        local nx = size($x, 2)
+        local ny = size($y, 2)
+        rxy = zeros(nx, ny)
+        rxx = zeros(nx, nx)
+        for j = 1 : ny, i = 1 : nx
+            rxy[i, j] = evaluate($dist, ($x)[:,i], ($y)[:,j])
+        end
+        for j = 1 : nx, i = 1 : nx
+            rxx[i, j] = evaluate($dist, ($x)[:,i], ($x)[:,j])
+        end
+        @test all_approx(pairwise($dist, $x, $y), rxy, $tol)
+        @test all_approx(pairwise($dist, $x), rxx, $tol)
+    end
 end
 
 @test_pairwise SqEuclidean() X Y 1.0e-14
@@ -186,7 +186,7 @@ end
 @test_pairwise Minkowski(2.5) X Y 1.0e-14
 @test_pairwise Hamming() A B 1.0e-16
 
-@test_pairwise CosineDist() X Y 1.0e-14 
+@test_pairwise CosineDist() X Y 1.0e-14
 @test_pairwise CorrDist() X Y 1.0e-14
 
 @test_pairwise ChiSqDist() X Y 1.0e-14
@@ -198,7 +198,7 @@ w = rand(m)
 @test_pairwise WeightedSqEuclidean(w) X Y 1.0e-14
 @test_pairwise WeightedEuclidean(w) X Y 1.0e-14
 @test_pairwise WeightedCityblock(w) X Y 1.0e-14
-@test_pairwise WeightedMinkowski(w, 2.5) X Y 1.0e-14 
+@test_pairwise WeightedMinkowski(w, 2.5) X Y 1.0e-14
 @test_pairwise WeightedHamming(w) A B 1.0e-14
 
 Q = rand(m, m)

@@ -8,7 +8,7 @@ type MyEuclidean <: Metric
 end
 
 function evaluate(dist::MyEuclidean, x::AbstractVector, y::AbstractVector)
-	sqrt(sum((x - y).^2))	
+    sqrt(sum((x - y).^2))
 end
 
 m = 5
