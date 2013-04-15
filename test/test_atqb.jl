@@ -1,7 +1,7 @@
 # Tests of At_Q_B, At_Q_A
 
 using Distance
-using Test
+using Base.Test
 
 # helpers
 

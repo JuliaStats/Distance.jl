@@ -1,7 +1,7 @@
 # Unit testing of generic functions on user-defined distances
 
 using Distance
-using Test
+using Base.Test
 import Distance.evaluate
 
 type MyEuclidean <: Metric
