@@ -496,7 +496,7 @@ function pairwise!(r::AbstractMatrix, dist::Euclidean, a::AbstractMatrix, b::Abs
     for j = 1 : nb
         for i = 1 : na
             v = sa2[i] + sb2[j] - 2 * r[i,j]
-            r[i,j] = sqrt(max(v, 0))
+            r[i,j] = isnan(v) ? NaN : sqrt(max(v, 0.))
         end
     end
 end
@@ -512,7 +512,7 @@ function pairwise!(r::AbstractMatrix, dist::Euclidean, a::AbstractMatrix)
         r[j,j] = 0
         for i = j+1 : n
             v = sa2[i] + sa2[j] - 2 * r[i,j]
-            r[i,j] = sqrt(max(v, 0))
+            r[i,j] = isnan(v) ? NaN : sqrt(max(v, 0.))
         end
     end
 end
