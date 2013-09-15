@@ -1,6 +1,7 @@
 module Distance
 
 using Devectorize
+using NumericExtensions
 
 export
     # generic types/functions

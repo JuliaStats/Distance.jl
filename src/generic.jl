@@ -35,7 +35,7 @@ function colwise!(r::AbstractArray, metric::PreMetric, a::AbstractVector, b::Abs
         throw(ArgumentError("Incorrect size of r."))
     end
     for j = 1 : n
-        r[j] = evaluate(metric, a, b[:,j])
+        @inbounds r[j] = evaluate(metric, a, unsafe_view(b, :, j))
     end
 end
 
@@ -45,7 +45,7 @@ function colwise!(r::AbstractArray, metric::PreMetric, a::AbstractMatrix, b::Abs
         throw(ArgumentError("Incorrect size of r."))
     end
     for j = 1 : n
-        r[j] = evaluate(metric, a[:,j], b)
+        @inbounds r[j] = evaluate(metric, unsafe_view(a, :, j), b)
     end
 end
 
@@ -55,7 +55,7 @@ function colwise!(r::AbstractArray, metric::PreMetric, a::AbstractMatrix, b::Abs
         throw(ArgumentError("Incorrect size of r."))
     end
     for j = 1 : n
-        r[j] = evaluate(metric, a[:,j], b[:,j])
+        @inbounds r[j] = evaluate(metric, unsafe_view(a, :, j), unsafe_view(b, :, j))
     end
 end
 
@@ -94,9 +94,9 @@ function pairwise!(r::AbstractMatrix, metric::PreMetric, a::AbstractMatrix, b::A
         throw(ArgumentError("Incorrect size of r."))
     end
     for j = 1 : size(b, 2)
-        bj = b[:,j]
+        bj = unsafe_view(b,:,j)
         for i = 1 : size(a, 2)
-            r[i,j] = evaluate(metric, a[:,i], bj)
+            @inbounds r[i,j] = evaluate(metric, unsafe_view(a,:,i), bj)
         end
     end
 end
@@ -111,13 +111,13 @@ function pairwise!(r::AbstractMatrix, metric::SemiMetric, a::AbstractMatrix)
         throw(ArgumentError("Incorrect size of r."))
     end
     for j = 1 : n
-        aj = a[:,j]
+        aj = unsafe_view(a,:,j)
         for i = j+1 : n
-            r[i,j] = evaluate(metric, a[:,i], aj)
+            @inbounds r[i,j] = evaluate(metric, unsafe_view(a,:,i), aj)
         end
-        r[j,j] = 0
+        @inbounds r[j,j] = 0
         for i = 1 : j-1
-            r[i,j] = r[j,i]   # leveraging the symmetry of SemiMetric
+            @inbounds r[i,j] = r[j,i]   # leveraging the symmetry of SemiMetric
         end
     end
 end
