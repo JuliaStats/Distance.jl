@@ -1,6 +1,5 @@
 module Distance
 
-using Devectorize
 using NumericExtensions
 
 export
