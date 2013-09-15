@@ -154,24 +154,24 @@ The table below compares the performance (measured in terms of average elapsed t
 
 |  distance   |   loop  |   colwise   |   gain     |
 |------------ | --------| ------------| -----------|
-| SqEuclidean | 0.038312 | 0.004708 | 8.137x | 
-| Euclidean | 0.036947 | 0.004158 | 8.885x | 
-| Cityblock | 0.037507 | 0.004348 | 8.626x |
-| Chebyshev | 0.045246 | 0.012861 | 3.517x |
-| Minkowski | 0.418969 | 0.379957 | 1.103x |
-| Hamming | 0.035414 | 0.004264 | 8.305x |
-| CosineDist | 0.053191 | 0.008009 | 6.642x |
-| CorrDist | 0.085048 | 0.035571 | 2.391x |
-| ChiSqDist | 0.04407 | 0.00839 | 5.253x |
-| KLDivergence | 0.071618 | 0.040244 | 1.780x |
-| JSDivergence | 0.45729 | 0.417977 | 1.094x |
-| WeightedSqEuclidean | 0.040023 | 0.006049 | 6.617x |
-| WeightedEuclidean | 0.039938 | 0.005953 | 6.710x |
-| WeightedCityblock | 0.038502 | 0.006362 | 6.052x |
-| WeightedMinkowski | 0.540418 | 0.510852 | 1.058x |
-| WeightedHamming | 0.039012 | 0.004541 | 8.592x |
-| SqMahalanobis | 0.135427 | 0.040468 | 3.347x |
-| Mahalanobis | 0.135613 | 0.04203 | 3.227x |
+| SqEuclidean | 0.046962 | 0.002782 | 16.8782 |
+| Euclidean | 0.046667 | 0.0029 | 16.0937 |
+| Cityblock | 0.046619 | 0.0031 | 15.039 |
+| Chebyshev | 0.053578 | 0.010856 | 4.9356 |
+| Minkowski | 0.061804 | 0.02357 | 2.6221 |
+| Hamming | 0.044047 | 0.00219 | 20.1131 |
+| CosineDist | 0.04496 | 0.002855 | 15.7457 |
+| CorrDist | 0.080828 | 0.029708 | 2.7207 |
+| ChiSqDist | 0.051009 | 0.008088 | 6.307 |
+| KLDivergence | 0.079598 | 0.035353 | 2.2515 |
+| JSDivergence | 0.545789 | 0.493362 | 1.1063 |
+| WeightedSqEuclidean | 0.046182 | 0.003219 | 14.3477 |
+| WeightedEuclidean | 0.046831 | 0.004122 | 11.3603 |
+| WeightedCityblock | 0.046457 | 0.003636 | 12.7781 |
+| WeightedMinkowski | 0.062532 | 0.020486 | 3.0524 |
+| WeightedHamming | 0.046217 | 0.002269 | 20.3667 |
+| SqMahalanobis | 0.150364 | 0.042335 | 3.5518 |
+| Mahalanobis | 0.159638 | 0.041071 | 3.8869 |
 
 We can see that using ``colwise`` instead of a simple loop yields considerable gain (2x - 9x), especially when the internal computation of each distance is simple. Nonetheless, when the computaton of a single distance is heavy enough (e.g. *Minkowski* and *JSDivergence*), the gain is not as significant.
 
@@ -181,24 +181,24 @@ The table below compares the performance (measured in terms of average elapsed t
 
 |  distance   |   loop  |   pairwise  |   gain     |
 |------------ | --------| ------------| -----------|
-| SqEuclidean | 0.092455 | 0.000459 | **201.31x** |
-| Euclidean | 0.091295 | 0.000734 | **124.36x** |
-| Cityblock | 0.09096 | 0.012827 | 7.0913x |
-| Chebyshev | 0.105589 | 0.033345 | 3.1665x | 
-| Minkowski | 1.015888 | 0.940429 | 1.0802x |
-| Hamming | 0.086808 | 0.010143 | 8.5583x |
-| CosineDist | 0.130899 | 0.001278 | **102.41x** |
-| CorrDist | 0.212448 | 0.000889 | **239.11x** |
-| ChiSqDist | 0.110598 | 0.025816 | 4.2841x |
-| KLDivergence | 0.177114 | 0.103134 | 1.7173x |
-| JSDivergence | 1.135585 | 1.030385 | 1.1021x |
-| WeightedSqEuclidean | 0.101272 | 0.00064 | **158.18x** |
-| WeightedEuclidean | 0.103933 | 0.000994 | **104.53x** |
-| WeightedCityblock | 0.101804 | 0.017774 | 5.7278x |
-| WeightedMinkowski | 1.381289 | 1.30307 | 1.0600x |
-| WeightedHamming | 0.095391 | 0.011416 | 8.3559x |
-| SqMahalanobis | 0.348651 | 0.000758 | **460.14x** |
-| Mahalanobis | 0.360126 | 0.001236 | **291.48x** |
+| SqEuclidean | 0.119961 | 0.00037 | **324.6457** |
+| Euclidean | 0.117371 | 0.001386 | **84.6937** |
+| Cityblock | 0.116956 | 0.007997 | 14.6251 |
+| Chebyshev | 0.137985 | 0.028489 | 4.8434 |
+| Minkowski | 0.170101 | 0.059991 | 2.8354 |
+| Hamming | 0.110742 | 0.004781 | 23.1627 |
+| CosineDist | 0.110913 | 0.000514 | **215.8028** |
+| CorrDist | 0.1992 | 0.000808 | 246.4574 |
+| ChiSqDist | 0.124782 | 0.020781 | 6.0046 |
+| KLDivergence | 0.1994 | 0.088366 | 2.2565 |
+| JSDivergence | 1.35502 | 1.215785 | 1.1145 |
+| WeightedSqEuclidean | 0.119797 | 0.000444 | **269.531** |
+| WeightedEuclidean | 0.126304 | 0.000712 | **177.5122** |
+| WeightedCityblock | 0.117185 | 0.011475 | 10.2122 |
+| WeightedMinkowski | 0.172614 | 0.061693 | 2.7979 |
+| WeightedHamming | 0.112525 | 0.005072 | 22.1871 |
+| SqMahalanobis | 0.377342 | 0.000577 | **653.9759** |
+| Mahalanobis | 0.373796 | 0.002359 | **158.4337** |
 
 For distances of which a major part of the computation is a quadratic form (e.g. *Euclidean*, *CosineDist*, *Mahalanobis*), the performance can be drastically improved by restructuring the computation and delegating the core part to ``GEMM`` in *BLAS*. The use of this strategy can easily lead to 100x performance gain over simple loops (see the highlighted part of the table above).
 

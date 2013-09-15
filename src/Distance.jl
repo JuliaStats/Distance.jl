@@ -45,11 +45,11 @@ export
     kl_divergence,
     js_divergence,
 
-    weighted_euclidean,
-    weighted_sqeuclidean,
-    weighted_cityblock,
-    weighted_minkowski,
-    weighted_hamming,
+    weuclidean,
+    wsqeuclidean,
+    wcityblock,
+    wminkowski,
+    whamming,
     sqmahalanobis,
     mahalanobis,
 

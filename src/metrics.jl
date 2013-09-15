@@ -47,6 +47,7 @@ function pairwise!(r::AbstractMatrix, dist::SqEuclidean, a::AbstractMatrix, b::A
             @inbounds r[i,j] = sa2[i] + sb2[j] - 2 * r[i,j]
         end
     end
+    r
 end
 
 function pairwise!(r::AbstractMatrix, dist::SqEuclidean, a::AbstractMatrix)
@@ -62,6 +63,7 @@ function pairwise!(r::AbstractMatrix, dist::SqEuclidean, a::AbstractMatrix)
             @inbounds r[i,j] = sa2[i] + sa2[j] - 2 * r[i,j]
         end
     end
+    r
 end
 
 # Euclidean
@@ -80,6 +82,7 @@ function pairwise!(r::AbstractMatrix, dist::Euclidean, a::AbstractMatrix, b::Abs
             @inbounds r[i,j] = isnan(v) ? NaN : sqrt(max(v, 0.))
         end
     end
+    r
 end
 
 function pairwise!(r::AbstractMatrix, dist::Euclidean, a::AbstractMatrix)
@@ -96,6 +99,7 @@ function pairwise!(r::AbstractMatrix, dist::Euclidean, a::AbstractMatrix)
             @inbounds r[i,j] = isnan(v) ? NaN : sqrt(max(v, 0.))
         end
     end
+    r
 end
 
 
@@ -127,7 +131,7 @@ function evaluate(dist::Hamming, a::AbstractVector, b::AbstractVector)
             r += 1
         end
     end
-    return r
+    r
 end
 
 hamming(a::AbstractVector, b::AbstractVector) = evaluate(Hamming(), a, b)
@@ -163,6 +167,7 @@ function pairwise!(r::AbstractMatrix, dist::CosineDist, a::AbstractMatrix, b::Ab
             @inbounds r[i,j] = max(1 - r[i,j] / (ra[i] * rb[j]), 0)
         end
     end
+    r
 end
 
 function pairwise!(r::AbstractMatrix, dist::CosineDist, a::AbstractMatrix)
@@ -178,6 +183,7 @@ function pairwise!(r::AbstractMatrix, dist::CosineDist, a::AbstractMatrix)
             @inbounds r[i,j] = r[j,i] 
         end
     end
+    r
 end
 
 
@@ -215,7 +221,7 @@ function evaluate{T<:FloatingPoint}(dist::ChiSqDist, a::AbstractVector{T}, b::Ab
         @inbounds bi = b[i]
         r += abs2(ai - bi) / (ai + bi)
     end
-    return r
+    r
 end
 
 chisq_dist(a::AbstractVector, b::AbstractVector) = evaluate(ChiSqDist(), a, b)
@@ -232,7 +238,7 @@ function evaluate{T<:FloatingPoint}(dist::KLDivergence, a::AbstractVector{T}, b:
             r += ai * log(ai / bi)
         end
     end
-    return r
+    r
 end
 
 kl_divergence(a::AbstractVector, b::AbstractVector) = evaluate(KLDivergence(), a, b)
@@ -252,7 +258,7 @@ function evaluate{T<:FloatingPoint}(dist::JSDivergence, a::AbstractVector{T}, b:
         tu = u > 0 ? u * log(u) : 0
         r += (ta + tb - tu)
     end
-    return r
+    r
 end
 
 js_divergence(a::AbstractVector, b::AbstractVector) = evaluate(JSDivergence(), a, b)

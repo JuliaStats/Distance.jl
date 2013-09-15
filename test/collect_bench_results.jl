@@ -15,17 +15,17 @@ function parse_results(lines, title1, title2)
 
     for raw_line in lines
         line = strip(raw_line)
-        if isempty(line) || begins_with(line, "#")
+        if isempty(line) || beginswith(line, "#")
             continue
         end
 
-        if begins_with(line, "bench")
+        if beginswith(line, "bench")
             @assert state == 0
             m = match(r"^bench\s+(\w+)", line)
             name = m.captures[1]
             state = 1
 
-        elseif begins_with(line, title1)
+        elseif beginswith(line, title1)
             @assert state == 1
             m = match(r"^(\w+):\s+t\s*=\s*([.\d]+)", line)
             t = m.captures[1]
@@ -33,7 +33,7 @@ function parse_results(lines, title1, title2)
             v1 = float64(m.captures[2])
             state = 2
 
-        elseif begins_with(line, title2)
+        elseif beginswith(line, title2)
             @assert state == 2
             m = match(r"^(\w+):\s+t\s*=\s*([.\d]+)s\s+\|\s*gain\s*=\s*([.\d]+)", line)
             t = m.captures[1]
@@ -73,9 +73,9 @@ function collect(title::ASCIIString, title1, title2)
 
     fout = open(outfile, "w")
     try
-        write(fout, "name, $title1, $title2, gain\n")
+        write(fout, "| name | $title1 | $title2 | gain |\n")
         for r in R
-            write(fout, "$(r[1]), $(r[2]), $(r[3]), $(r[4])\n")
+            write(fout, "| $(r[1]) | $(r[2]) | $(r[3]) | $(r[4]) |\n")
         end
         flush(fout)
     catch err

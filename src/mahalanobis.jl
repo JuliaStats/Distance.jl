@@ -23,31 +23,27 @@ sqmahalanobis(a::AbstractVector, b::AbstractVector, Q::AbstractMatrix) = evaluat
 
 function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::SqMahalanobis{T}, a::AbstractMatrix, b::AbstractMatrix)
     Q = dist.qmat
-    m, n = get_colwise_dims(size(Q, 1), r, a, b)
+    m::Int, n::Int = get_colwise_dims(size(Q, 1), r, a, b)
     z = a - b
-    Qz = Q * z
-    @devec r[:] = sum(Qz .* z, 1)
+    dot!(r, Q * z, z, 1)
 end
 
 function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::SqMahalanobis{T}, a::AbstractVector, b::AbstractMatrix)
     Q = dist.qmat
-    m, n = get_colwise_dims(size(Q, 1), r, a, b)
-    z = Array(T, (m, n))
-    for j = 1 : n
-        @devec z[:,j] = a - b[:,j]
-    end
+    m::Int, n::Int = get_colwise_dims(size(Q, 1), r, a, b)
+    z = a .- b
     Qz = Q * z
-    @devec r[:] = sum(Qz .* z, 1)
+    dot!(r, Q * z, z, 1)
 end
 
 function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::SqMahalanobis{T}, a::AbstractMatrix, b::AbstractMatrix)
     Q = dist.qmat
-    m, na, nb = get_pairwise_dims(size(Q, 1), r, a, b)
+    m::Int, na::Int, nb::Int = get_pairwise_dims(size(Q, 1), r, a, b)
 
     Qa = Q * a
     Qb = Q * b
-    @devec sa2 = sum(a .* Qa, 1)
-    @devec sb2 = sum(b .* Qb, 1)
+    sa2 = dot(a, Qa, 1)
+    sb2 = dot(b, Qb, 1)
     At_mul_B(r, a, Qb)
 
     for j = 1 : nb
@@ -55,14 +51,15 @@ function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::SqMahalanobis{T}, 
             r[i,j] = sa2[i] + sb2[j] - 2 * r[i,j]
         end
     end
+    r
 end
 
 function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::SqMahalanobis{T}, a::AbstractMatrix)
     Q = dist.qmat
-    m, n = get_pairwise_dims(size(Q, 1), r, a)
+    m::Int, n::Int = get_pairwise_dims(size(Q, 1), r, a)
 
     Qa = Q * a
-    @devec sa2 = sum(a .* Qa, 1)
+    sa2 = dot(a, Qa, 1)
     At_mul_B(r, a, Qa)
 
     for j = 1 : n
@@ -74,6 +71,7 @@ function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::SqMahalanobis{T}, 
             r[i,j] = sa2[i] + sa2[j] - 2 * r[i,j]
         end
     end
+    r
 end
 
 
@@ -86,23 +84,19 @@ end
 mahalanobis(a::AbstractVector, b::AbstractVector, Q::AbstractMatrix) = evaluate(Mahalanobis(Q), a, b)
 
 function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::Mahalanobis{T}, a::AbstractMatrix, b::AbstractMatrix)
-    colwise!(r, SqMahalanobis(dist.qmat), a, b)
-    @devec r[:] = sqrt(r)
+    sqrt!(colwise!(r, SqMahalanobis(dist.qmat), a, b))
 end
 
 function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::Mahalanobis{T}, a::AbstractVector, b::AbstractMatrix)
-    colwise!(r, SqMahalanobis(dist.qmat), a, b)
-    @devec r[:] = sqrt(r)
+    sqrt!(colwise!(r, SqMahalanobis(dist.qmat), a, b))
 end
 
 function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::Mahalanobis{T}, a::AbstractMatrix, b::AbstractMatrix)
-    pairwise!(r, SqMahalanobis(dist.qmat), a, b)
-    @devec r[:] = sqrt(max(r, 0))
+    sqrt!(pairwise!(r, SqMahalanobis(dist.qmat), a, b))
 end
 
 function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::Mahalanobis{T}, a::AbstractMatrix)
-    pairwise!(r, SqMahalanobis(dist.qmat), a)
-    @devec r[:] = sqrt(max(r, 0))
+    sqrt!(pairwise!(r, SqMahalanobis(dist.qmat), a))
 end
 
 

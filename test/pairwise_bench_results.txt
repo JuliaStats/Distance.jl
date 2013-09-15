@@ -1,75 +1,72 @@
-# Mac OS X 10.8.2
-# 2.6 GHz Intel Core i7
-# Julia Commit bbf2aca167 (2013-02-07 13:51:31)
-
 bench SqEuclidean
-    loop:      t =  0.092455s
-    pairwise:  t =  0.000459s  |  gain = 201.3148x
+    loop:      t =  0.119961s
+    pairwise:  t =  0.000370s  |  gain = 324.6457x
 
 bench Euclidean
-    loop:      t =  0.091295s
-    pairwise:  t =  0.000734s  |  gain = 124.3632x
+    loop:      t =  0.117371s
+    pairwise:  t =  0.001386s  |  gain = 84.6937x
 
 bench Cityblock
-    loop:      t =  0.090960s
-    pairwise:  t =  0.012827s  |  gain =  7.0913x
+    loop:      t =  0.116956s
+    pairwise:  t =  0.007997s  |  gain = 14.6251x
 
 bench Chebyshev
-    loop:      t =  0.105589s
-    pairwise:  t =  0.033345s  |  gain =  3.1665x
+    loop:      t =  0.137985s
+    pairwise:  t =  0.028489s  |  gain =  4.8434x
 
 bench Minkowski
-    loop:      t =  1.015888s
-    pairwise:  t =  0.940429s  |  gain =  1.0802x
+    loop:      t =  0.170101s
+    pairwise:  t =  0.059991s  |  gain =  2.8354x
 
 bench Hamming
-    loop:      t =  0.086808s
-    pairwise:  t =  0.010143s  |  gain =  8.5583x
+    loop:      t =  0.110742s
+    pairwise:  t =  0.004781s  |  gain = 23.1627x
 
 bench CosineDist
-    loop:      t =  0.130899s
-    pairwise:  t =  0.001278s  |  gain = 102.4091x
+    loop:      t =  0.110913s
+    pairwise:  t =  0.000514s  |  gain = 215.8028x
 
 bench CorrDist
-    loop:      t =  0.212448s
-    pairwise:  t =  0.000889s  |  gain = 239.1051x
+    loop:      t =  0.199200s
+    pairwise:  t =  0.000808s  |  gain = 246.4574x
 
 bench ChiSqDist
-    loop:      t =  0.110598s
-    pairwise:  t =  0.025816s  |  gain =  4.2841x
+    loop:      t =  0.124782s
+    pairwise:  t =  0.020781s  |  gain =  6.0046x
 
 bench KLDivergence
-    loop:      t =  0.177114s
-    pairwise:  t =  0.103134s  |  gain =  1.7173x
+    loop:      t =  0.199400s
+    pairwise:  t =  0.088366s  |  gain =  2.2565x
 
 bench JSDivergence
-    loop:      t =  1.135585s
-    pairwise:  t =  1.030385s  |  gain =  1.1021x
+    loop:      t =  1.355020s
+    pairwise:  t =  1.215785s  |  gain =  1.1145x
 
 bench WeightedSqEuclidean{Float64}
-    loop:      t =  0.101272s
-    pairwise:  t =  0.000640s  |  gain = 158.1754x
+    loop:      t =  0.119797s
+    pairwise:  t =  0.000444s  |  gain = 269.5310x
 
 bench WeightedEuclidean{Float64}
-    loop:      t =  0.103933s
-    pairwise:  t =  0.000994s  |  gain = 104.5287x
+    loop:      t =  0.126304s
+    pairwise:  t =  0.000712s  |  gain = 177.5122x
 
 bench WeightedCityblock{Float64}
-    loop:      t =  0.101804s
-    pairwise:  t =  0.017774s  |  gain =  5.7278x
+    loop:      t =  0.117185s
+    pairwise:  t =  0.011475s  |  gain = 10.2122x
 
 bench WeightedMinkowski{Float64}
-    loop:      t =  1.381289s
-    pairwise:  t =  1.303070s  |  gain =  1.0600x
+    loop:      t =  0.172614s
+    pairwise:  t =  0.061693s  |  gain =  2.7979x
 
 bench WeightedHamming{Float64}
-    loop:      t =  0.095391s
-    pairwise:  t =  0.011416s  |  gain =  8.3559x
+    loop:      t =  0.112525s
+    pairwise:  t =  0.005072s  |  gain = 22.1871x
 
 bench SqMahalanobis{Float64}
-    loop:      t =  0.348651s
-    pairwise:  t =  0.000758s  |  gain = 460.1472x
+    loop:      t =  0.377342s
+    pairwise:  t =  0.000577s  |  gain = 653.9759x
 
 bench Mahalanobis{Float64}
-    loop:      t =  0.360126s
-    pairwise:  t =  0.001236s  |  gain = 291.4798x
+    loop:      t =  0.373796s
+    pairwise:  t =  0.002359s  |  gain = 158.4337x
+

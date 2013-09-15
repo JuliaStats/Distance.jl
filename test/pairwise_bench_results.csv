@@ -1,19 +1,19 @@
-name, loop, pairwise, gain
-SqEuclidean, 0.092455, 0.000459, 201.3148
-Euclidean, 0.091295, 0.000734, 124.3632
-Cityblock, 0.09096, 0.012827, 7.0913
-Chebyshev, 0.105589, 0.033345, 3.1665
-Minkowski, 1.015888, 0.940429, 1.0802
-Hamming, 0.086808, 0.010143, 8.5583
-CosineDist, 0.130899, 0.001278, 102.4091
-CorrDist, 0.212448, 0.000889, 239.1051
-ChiSqDist, 0.110598, 0.025816, 4.2841
-KLDivergence, 0.177114, 0.103134, 1.7173
-JSDivergence, 1.135585, 1.030385, 1.1021
-WeightedSqEuclidean, 0.101272, 0.00064, 158.1754
-WeightedEuclidean, 0.103933, 0.000994, 104.5287
-WeightedCityblock, 0.101804, 0.017774, 5.7278
-WeightedMinkowski, 1.381289, 1.30307, 1.06
-WeightedHamming, 0.095391, 0.011416, 8.3559
-SqMahalanobis, 0.348651, 0.000758, 460.1472
-Mahalanobis, 0.360126, 0.001236, 291.4798
+| name | loop | pairwise | gain |
+| SqEuclidean | 0.119961 | 0.00037 | 324.6457 |
+| Euclidean | 0.117371 | 0.001386 | 84.6937 |
+| Cityblock | 0.116956 | 0.007997 | 14.6251 |
+| Chebyshev | 0.137985 | 0.028489 | 4.8434 |
+| Minkowski | 0.170101 | 0.059991 | 2.8354 |
+| Hamming | 0.110742 | 0.004781 | 23.1627 |
+| CosineDist | 0.110913 | 0.000514 | 215.8028 |
+| CorrDist | 0.1992 | 0.000808 | 246.4574 |
+| ChiSqDist | 0.124782 | 0.020781 | 6.0046 |
+| KLDivergence | 0.1994 | 0.088366 | 2.2565 |
+| JSDivergence | 1.35502 | 1.215785 | 1.1145 |
+| WeightedSqEuclidean | 0.119797 | 0.000444 | 269.531 |
+| WeightedEuclidean | 0.126304 | 0.000712 | 177.5122 |
+| WeightedCityblock | 0.117185 | 0.011475 | 10.2122 |
+| WeightedMinkowski | 0.172614 | 0.061693 | 2.7979 |
+| WeightedHamming | 0.112525 | 0.005072 | 22.1871 |
+| SqMahalanobis | 0.377342 | 0.000577 | 653.9759 |
+| Mahalanobis | 0.373796 | 0.002359 | 158.4337 |

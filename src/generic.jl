@@ -37,6 +37,7 @@ function colwise!(r::AbstractArray, metric::PreMetric, a::AbstractVector, b::Abs
     for j = 1 : n
         @inbounds r[j] = evaluate(metric, a, unsafe_view(b, :, j))
     end
+    r
 end
 
 function colwise!(r::AbstractArray, metric::PreMetric, a::AbstractMatrix, b::AbstractVector)
@@ -47,6 +48,7 @@ function colwise!(r::AbstractArray, metric::PreMetric, a::AbstractMatrix, b::Abs
     for j = 1 : n
         @inbounds r[j] = evaluate(metric, unsafe_view(a, :, j), b)
     end
+    r
 end
 
 function colwise!(r::AbstractArray, metric::PreMetric, a::AbstractMatrix, b::AbstractMatrix)
@@ -57,6 +59,7 @@ function colwise!(r::AbstractArray, metric::PreMetric, a::AbstractMatrix, b::Abs
     for j = 1 : n
         @inbounds r[j] = evaluate(metric, unsafe_view(a, :, j), unsafe_view(b, :, j))
     end
+    r
 end
 
 function colwise!(r::AbstractArray, metric::SemiMetric, a::AbstractMatrix, b::AbstractVector)
@@ -67,21 +70,18 @@ function colwise(metric::PreMetric, a::AbstractMatrix, b::AbstractMatrix)
     n = get_common_ncols(a, b)
     r = Array(result_type(metric, eltype(a), eltype(b)), n)
     colwise!(r, metric, a, b)
-    return r
 end
 
 function colwise(metric::PreMetric, a::AbstractVector, b::AbstractMatrix)
     n = size(b, 2)
     r = Array(result_type(metric, eltype(a), eltype(b)), n)
     colwise!(r, metric, a, b)
-    return r
 end
 
 function colwise(metric::PreMetric, a::AbstractMatrix, b::AbstractVector)
     n = size(a, 2)
     r = Array(result_type(metric, eltype(a), eltype(b)), n)
     colwise!(r, metric, a, b)
-    return r
 end
 
 
@@ -99,6 +99,7 @@ function pairwise!(r::AbstractMatrix, metric::PreMetric, a::AbstractMatrix, b::A
             @inbounds r[i,j] = evaluate(metric, unsafe_view(a,:,i), bj)
         end
     end
+    r
 end
 
 function pairwise!(r::AbstractMatrix, metric::PreMetric, a::AbstractMatrix)
@@ -120,6 +121,7 @@ function pairwise!(r::AbstractMatrix, metric::SemiMetric, a::AbstractMatrix)
             @inbounds r[i,j] = r[j,i]   # leveraging the symmetry of SemiMetric
         end
     end
+    r
 end
 
 function pairwise(metric::PreMetric, a::AbstractMatrix, b::AbstractMatrix)
@@ -127,21 +129,18 @@ function pairwise(metric::PreMetric, a::AbstractMatrix, b::AbstractMatrix)
     n = size(b, 2)
     r = Array(result_type(metric, eltype(a), eltype(b)), (m, n))
     pairwise!(r, metric, a, b)
-    return r
 end
 
 function pairwise(metric::PreMetric, a::AbstractMatrix)
     n = size(a, 2)
     r = Array(result_type(metric, eltype(a), eltype(a)), (n, n))
     pairwise!(r, metric, a)
-    return r
 end
 
 function pairwise(metric::SemiMetric, a::AbstractMatrix)
     n = size(a, 2)
     r = Array(result_type(metric, eltype(a), eltype(a)), (n, n))
     pairwise!(r, metric, a)
-    return r
 end
 
 
