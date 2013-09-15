@@ -49,11 +49,13 @@ wsqeuclidean(a::AbstractVector, b::AbstractVector, w::AbstractVector) = evaluate
 
 function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedSqEuclidean{T}, a::AbstractMatrix, b::AbstractMatrix)
     w = dist.weights
-    m, na, nb = get_pairwise_dims(length(w), r, a, b)
+    m::Int, na::Int, nb::Int = get_pairwise_dims(length(w), r, a, b)
 
     sa2 = wsqsum(w, a, 1)
     sb2 = wsqsum(w, b, 1)
-    At_Q_B!(r, w, a, b)
+    wB = bmultiply(b, w, 1)
+    At_mul_B(r, a, wB)
+
     for j = 1 : nb
         for i = 1 : na
             @inbounds r[i,j] = sa2[i] + sb2[j] - 2 * r[i,j]
@@ -64,10 +66,12 @@ end
 
 function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedSqEuclidean{T}, a::AbstractMatrix)
     w = dist.weights
-    m, n = get_pairwise_dims(length(w), r, a)
+    m::Int, n::Int = get_pairwise_dims(length(w), r, a)
 
     sa2 = wsqsum(w, a, 1)
-    At_Q_A!(r, w, a)
+    wA = bmultiply(a, w, 1)
+    At_mul_B(r, a, wA)
+
     for j = 1 : n
         for i = 1 : j-1
             @inbounds r[i,j] = r[j,i]

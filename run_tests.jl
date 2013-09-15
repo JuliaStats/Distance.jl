@@ -1,4 +1,4 @@
-tests = ["atqb", "dists"]
+tests = ["dists"]
 
 for t in tests
 	fn = joinpath("test", "test_$t.jl")

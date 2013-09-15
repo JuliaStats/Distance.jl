@@ -5,8 +5,17 @@ using NumericExtensions
 
 export
     # generic types/functions
-    GeneralizedMetric,
+    PreMetric,
+    SemiMetric,
     Metric,
+
+    # generic functions
+    result_type,
+    colwise,
+    pairwise,
+    colwise!,
+    pairwise!,
+    evaluate,
 
     # distance classes
     Euclidean,
@@ -51,23 +60,10 @@ export
     wminkowski,
     whamming,
     sqmahalanobis,
-    mahalanobis,
-
-    # generic functions
-    result_type,
-    colwise,
-    pairwise,
-    colwise!,
-    pairwise!,
-    evaluate,
-
-    # other convenient functions
-    At_Q_B, At_Q_A
-
+    mahalanobis
 
 include("common.jl")
 include("generic.jl")
-include("at_q_b.jl")
 include("metrics.jl")
 include("wmetrics.jl")
 include("mahalanobis.jl")

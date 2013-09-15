@@ -182,7 +182,7 @@ The table below compares the performance (measured in terms of average elapsed t
 |  distance   |   loop  |   pairwise  |   gain     |
 |------------ | --------| ------------| -----------|
 | SqEuclidean | 0.119961 | 0.00037 | **324.6457** |
-| Euclidean | 0.117371 | 0.001386 | **84.6937** |
+| Euclidean | 0.122645 | 0.000678 | **180.9180** |
 | Cityblock | 0.116956 | 0.007997 | 14.6251 |
 | Chebyshev | 0.137985 | 0.028489 | 4.8434 |
 | Minkowski | 0.170101 | 0.059991 | 2.8354 |
