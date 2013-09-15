@@ -24,7 +24,7 @@ abstract Metric <: SemiMetric
 
 # Generic functions
 
-result_type(::PreMetric, T1::Type, T2::Type) = promote_type(T1, T2)
+result_type(::PreMetric, T1::Type, T2::Type) = NumericExtensions.to_fptype(promote_type(T1, T2))
 
 
 # Generic column-wise evaluation
