@@ -61,6 +61,9 @@ jsv = kl_divergence(p, pm) / 2 + kl_divergence(q, pm) / 2
 @test is_approx(js_divergence(p, p), 0., 1.0e-14)
 @test is_approx(js_divergence(p, q), jsv, 1.0e-14)
 
+@test spannorm_dist(x, x) == 0.
+@test spannorm_dist(x, y) == max(x - y) - min(x - y)
+
 w = rand(size(x))
 
 @test wsqeuclidean(x, x, w) == 0.
@@ -133,6 +136,7 @@ end
 @test_colwise ChiSqDist() X Y 1.0e-14
 @test_colwise KLDivergence() P Q 1.0e-13
 @test_colwise JSDivergence() P Q 1.0e-13
+@test_colwise SpanNormDist() X Y 1.0e-14
 
 w = rand(m)
 

@@ -29,6 +29,7 @@ export
     ChiSqDist,
     KLDivergence,
     JSDivergence,
+    SpanNormDist,
 
     WeightedEuclidean,
     WeightedSqEuclidean,
@@ -52,6 +53,7 @@ export
     chisq_dist,
     kl_divergence,
     js_divergence,
+    spannorm_dist,
 
     weuclidean,
     wsqeuclidean,

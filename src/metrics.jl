@@ -25,6 +25,8 @@ type ChiSqDist <: SemiMetric end
 type KLDivergence <: PreMetric end
 type JSDivergence <: SemiMetric end
 
+type SpanNormDist <: SemiMetric end
+
 
 ###########################################################
 #
@@ -262,4 +264,23 @@ function evaluate{T<:FloatingPoint}(dist::JSDivergence, a::AbstractVector{T}, b:
 end
 
 js_divergence(a::AbstractVector, b::AbstractVector) = evaluate(JSDivergence(), a, b)
+
+
+# SpanNorm
+
+function evaluate(dist::SpanNormDist, a::AbstractVector, b::AbstractVector)
+    max_d = min_d = a[1] - b[1]
+    for i = 1 : length(a)
+        @inbounds di = a[i] - b[i]
+        if di > max_d
+            max_d = di
+        elseif di < min_d
+            min_d = di
+        end
+    end
+    max_d - min_d
+end
+
+spannorm_dist(a::AbstractVector, b::AbstractVector) = evaluate(SpanNormDist(), a, b)
+
 
