@@ -36,14 +36,14 @@ type SpanNormDist <: SemiMetric end
 
 # SqEuclidean
 
-evaluate(dist::SqEuclidean, a::AbstractVector, b::AbstractVector) = sqdiffsum(a, b)
+evaluate(dist::SqEuclidean, a::AbstractVector, b::AbstractVector) = sumsqdiff(a, b)
 sqeuclidean(a::AbstractVector, b::AbstractVector) = evaluate(SqEuclidean(), a, b)
 
 function pairwise!(r::AbstractMatrix, dist::SqEuclidean, a::AbstractMatrix, b::AbstractMatrix)
     m::Int, na::Int, nb::Int = get_pairwise_dims(r, a, b)
     At_mul_B(r, a, b)
-    sa2 = sqsum(a, 1)
-    sb2 = sqsum(b, 1)
+    sa2 = sumsq(a, 1)
+    sb2 = sumsq(b, 1)
     for j = 1 : nb
         for i = 1 : na
             @inbounds r[i,j] = sa2[i] + sb2[j] - 2 * r[i,j]
@@ -55,7 +55,7 @@ end
 function pairwise!(r::AbstractMatrix, dist::SqEuclidean, a::AbstractMatrix)
     m::Int, n::Int = get_pairwise_dims(r, a)
     At_mul_B(r, a, a)
-    sa2 = sqsum(a, 1)
+    sa2 = sumsq(a, 1)
     for j = 1 : n
         for i = 1 : j-1
             @inbounds r[i,j] = r[j,i]
@@ -70,14 +70,14 @@ end
 
 # Euclidean
 
-evaluate(dist::Euclidean, a::AbstractVector, b::AbstractVector) = sqrt(sqdiffsum(a, b))
+evaluate(dist::Euclidean, a::AbstractVector, b::AbstractVector) = sqrt(sumsqdiff(a, b))
 euclidean(a::AbstractVector, b::AbstractVector) = evaluate(Euclidean(), a, b)
 
 function pairwise!(r::AbstractMatrix, dist::Euclidean, a::AbstractMatrix, b::AbstractMatrix)
     m::Int, na::Int, nb::Int = get_pairwise_dims(r, a, b)
     At_mul_B(r, a, b)
-    sa2 = sqsum(a, 1)
-    sb2 = sqsum(b, 1)
+    sa2 = sumsq(a, 1)
+    sb2 = sumsq(b, 1)
     for j = 1 : nb
         for i = 1 : na
             @inbounds v = sa2[i] + sb2[j] - 2 * r[i,j]
@@ -90,7 +90,7 @@ end
 function pairwise!(r::AbstractMatrix, dist::Euclidean, a::AbstractMatrix)
     m::Int, n::Int = get_pairwise_dims(r, a)
     At_mul_B(r, a, a)
-    sa2 = sqsum(a, 1)
+    sa2 = sumsq(a, 1)
     for j = 1 : n
         for i = 1 : j-1
             @inbounds r[i,j] = r[j,i]
@@ -107,19 +107,19 @@ end
 
 # Cityblock
 
-evaluate(dist::Cityblock, a::AbstractVector, b::AbstractVector) = adiffsum(a, b)
+evaluate(dist::Cityblock, a::AbstractVector, b::AbstractVector) = sumabsdiff(a, b)
 cityblock(a::AbstractVector, b::AbstractVector) = evaluate(Cityblock(), a, b)
 
 
 # Chebyshev
 
-evaluate(dist::Chebyshev, a::AbstractVector, b::AbstractVector) = adiffmax(a, b)
+evaluate(dist::Chebyshev, a::AbstractVector, b::AbstractVector) = maxabsdiff(a, b)
 chebyshev(a::AbstractVector, b::AbstractVector) = evaluate(Chebyshev(), a, b)
 
 
 # Minkowski
 
-evaluate(dist::Minkowski, a::AbstractVector, b::AbstractVector) = sum_fdiff(FixAbsPow(dist.p), a, b) ^ (1/dist.p)
+evaluate(dist::Minkowski, a::AbstractVector, b::AbstractVector) = sumfdiff(FixAbsPow(dist.p), a, b) ^ (1/dist.p)
 minkowski(a::AbstractVector, b::AbstractVector, p::Real) = evaluate(Minkowski(p), a, b)
 
 
@@ -162,8 +162,8 @@ cosine_dist(a::AbstractVector, b::AbstractVector) = evaluate(CosineDist(), a, b)
 function pairwise!(r::AbstractMatrix, dist::CosineDist, a::AbstractMatrix, b::AbstractMatrix)
     m::Int, na::Int, nb::Int = get_pairwise_dims(r, a, b)
     At_mul_B(r, a, b)
-    ra = sqrt!(sqsum(a, 1))
-    rb = sqrt!(sqsum(b, 1))
+    ra = sqrt!(sumsq(a, 1))
+    rb = sqrt!(sumsq(b, 1))
     for j = 1 : nb
         for i = 1 : na
             @inbounds r[i,j] = max(1 - r[i,j] / (ra[i] * rb[j]), 0)
@@ -175,7 +175,7 @@ end
 function pairwise!(r::AbstractMatrix, dist::CosineDist, a::AbstractMatrix)
     m, n = get_pairwise_dims(r, a)
     At_mul_B(r, a, a)
-    ra = sqrt!(sqsum(a, 1))
+    ra = sqrt!(sumsq(a, 1))
     for j = 1 : n
         for i = j+1 : n
             @inbounds r[i,j] = max(1 - r[i,j] / (ra[i] * ra[j]), 0)

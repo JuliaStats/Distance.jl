@@ -44,15 +44,15 @@ result_type{T}(::WeightedHamming{T}, T1::Type, T2::Type) = T
 
 # Weighted squared Euclidean
 
-evaluate{T<:FloatingPoint}(dist::WeightedSqEuclidean{T}, a::AbstractVector, b::AbstractVector) = wsqdiffsum(dist.weights, a, b)
+evaluate{T<:FloatingPoint}(dist::WeightedSqEuclidean{T}, a::AbstractVector, b::AbstractVector) = wsumsqdiff(dist.weights, a, b)
 wsqeuclidean(a::AbstractVector, b::AbstractVector, w::AbstractVector) = evaluate(WeightedSqEuclidean(w), a, b)
 
 function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedSqEuclidean{T}, a::AbstractMatrix, b::AbstractMatrix)
     w = dist.weights
     m::Int, na::Int, nb::Int = get_pairwise_dims(length(w), r, a, b)
 
-    sa2 = wsqsum(w, a, 1)
-    sb2 = wsqsum(w, b, 1)
+    sa2 = wsumsq(w, a, 1)
+    sb2 = wsumsq(w, b, 1)
     wB = bmultiply(b, w, 1)
     At_mul_B(r, a, wB)
 
@@ -68,7 +68,7 @@ function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedSqEuclidea
     w = dist.weights
     m::Int, n::Int = get_pairwise_dims(length(w), r, a)
 
-    sa2 = wsqsum(w, a, 1)
+    sa2 = wsumsq(w, a, 1)
     wA = bmultiply(a, w, 1)
     At_mul_B(r, a, wA)
 
@@ -112,14 +112,14 @@ end
 
 # Weighted Cityblock
 
-evaluate{T<:FloatingPoint}(dist::WeightedCityblock{T}, a::AbstractVector, b::AbstractVector) = wadiffsum(dist.weights, a, b)
+evaluate{T<:FloatingPoint}(dist::WeightedCityblock{T}, a::AbstractVector, b::AbstractVector) = wsumabsdiff(dist.weights, a, b)
 wcityblock(a::AbstractVector, b::AbstractVector, w::AbstractVector) = evaluate(WeightedCityblock(w), a, b)
 
 
 # WeightedMinkowski
 
 function evaluate{T<:FloatingPoint}(dist::WeightedMinkowski{T}, a::AbstractVector, b::AbstractVector) 
-    wsum_fdiff(dist.weights, FixAbsPow(dist.p), a, b) ^ inv(dist.p)
+    wsumfdiff(dist.weights, FixAbsPow(dist.p), a, b) ^ inv(dist.p)
 end
 
 wminkowski(a::AbstractVector, b::AbstractVector, w::AbstractVector, p::Real) = evaluate(WeightedMinkowski(w, p), a, b)
