@@ -41,7 +41,7 @@ sqeuclidean(a::AbstractVector, b::AbstractVector) = evaluate(SqEuclidean(), a, b
 
 function pairwise!(r::AbstractMatrix, dist::SqEuclidean, a::AbstractMatrix, b::AbstractMatrix)
     m::Int, na::Int, nb::Int = get_pairwise_dims(r, a, b)
-    At_mul_B(r, a, b)
+    At_mul_B!(r, a, b)
     sa2 = sumsq(a, 1)
     sb2 = sumsq(b, 1)
     for j = 1 : nb
@@ -54,7 +54,7 @@ end
 
 function pairwise!(r::AbstractMatrix, dist::SqEuclidean, a::AbstractMatrix)
     m::Int, n::Int = get_pairwise_dims(r, a)
-    At_mul_B(r, a, a)
+    At_mul_B!(r, a, a)
     sa2 = sumsq(a, 1)
     for j = 1 : n
         for i = 1 : j-1
@@ -75,7 +75,7 @@ euclidean(a::AbstractVector, b::AbstractVector) = evaluate(Euclidean(), a, b)
 
 function pairwise!(r::AbstractMatrix, dist::Euclidean, a::AbstractMatrix, b::AbstractMatrix)
     m::Int, na::Int, nb::Int = get_pairwise_dims(r, a, b)
-    At_mul_B(r, a, b)
+    At_mul_B!(r, a, b)
     sa2 = sumsq(a, 1)
     sb2 = sumsq(b, 1)
     for j = 1 : nb
@@ -89,7 +89,7 @@ end
 
 function pairwise!(r::AbstractMatrix, dist::Euclidean, a::AbstractMatrix)
     m::Int, n::Int = get_pairwise_dims(r, a)
-    At_mul_B(r, a, a)
+    At_mul_B!(r, a, a)
     sa2 = sumsq(a, 1)
     for j = 1 : n
         for i = 1 : j-1
@@ -161,7 +161,7 @@ cosine_dist(a::AbstractVector, b::AbstractVector) = evaluate(CosineDist(), a, b)
 
 function pairwise!(r::AbstractMatrix, dist::CosineDist, a::AbstractMatrix, b::AbstractMatrix)
     m::Int, na::Int, nb::Int = get_pairwise_dims(r, a, b)
-    At_mul_B(r, a, b)
+    At_mul_B!(r, a, b)
     ra = sqrt!(sumsq(a, 1))
     rb = sqrt!(sumsq(b, 1))
     for j = 1 : nb
@@ -174,7 +174,7 @@ end
 
 function pairwise!(r::AbstractMatrix, dist::CosineDist, a::AbstractMatrix)
     m, n = get_pairwise_dims(r, a)
-    At_mul_B(r, a, a)
+    At_mul_B!(r, a, a)
     ra = sqrt!(sumsq(a, 1))
     for j = 1 : n
         for i = j+1 : n

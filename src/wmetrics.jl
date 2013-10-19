@@ -54,7 +54,7 @@ function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedSqEuclidea
     sa2 = wsumsq(w, a, 1)
     sb2 = wsumsq(w, b, 1)
     wB = bmultiply(b, w, 1)
-    At_mul_B(r, a, wB)
+    At_mul_B!(r, a, wB)
 
     for j = 1 : nb
         for i = 1 : na
@@ -70,7 +70,7 @@ function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedSqEuclidea
 
     sa2 = wsumsq(w, a, 1)
     wA = bmultiply(a, w, 1)
-    At_mul_B(r, a, wA)
+    At_mul_B!(r, a, wA)
 
     for j = 1 : n
         for i = 1 : j-1

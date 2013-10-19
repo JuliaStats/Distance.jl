@@ -62,7 +62,7 @@ jsv = kl_divergence(p, pm) / 2 + kl_divergence(q, pm) / 2
 @test is_approx(js_divergence(p, q), jsv, 1.0e-14)
 
 @test spannorm_dist(x, x) == 0.
-@test spannorm_dist(x, y) == max(x - y) - min(x - y)
+@test spannorm_dist(x, y) == maximum(x - y) - minimum(x - y)
 
 w = rand(size(x))
 

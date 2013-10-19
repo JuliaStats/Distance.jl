@@ -44,7 +44,7 @@ function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::SqMahalanobis{T}, 
     Qb = Q * b
     sa2 = dot(a, Qa, 1)
     sb2 = dot(b, Qb, 1)
-    At_mul_B(r, a, Qb)
+    At_mul_B!(r, a, Qb)
 
     for j = 1 : nb
         for i = 1 : na
@@ -60,7 +60,7 @@ function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::SqMahalanobis{T}, 
 
     Qa = Q * a
     sa2 = dot(a, Qa, 1)
-    At_mul_B(r, a, Qa)
+    At_mul_B!(r, a, Qa)
 
     for j = 1 : n
         for i = 1 : j-1
