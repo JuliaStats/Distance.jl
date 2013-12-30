@@ -15,5 +15,5 @@ script:
     - julia -e 'Pkg.add("NumericExtensions")'
     - mkdir -p ~/.julia/Distance
     - cp -R ./* ~/.julia/Distance/
-    - julia ~/.julia/Distance/run_tests.jl
+    - julia ~/.julia/Distance/runtests.jl
     

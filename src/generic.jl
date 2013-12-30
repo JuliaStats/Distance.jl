@@ -31,9 +31,7 @@ result_type(::PreMetric, T1::Type, T2::Type) = fptype(promote_type(T1, T2))
 
 function colwise!(r::AbstractArray, metric::PreMetric, a::AbstractVector, b::AbstractMatrix)
     n = size(b, 2)
-    if length(r) != n
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    length(r) == n || throw(DimensionMismatch("Incorrect size of r."))
     for j = 1 : n
         @inbounds r[j] = evaluate(metric, a, unsafe_view(b, :, j))
     end
@@ -42,9 +40,7 @@ end
 
 function colwise!(r::AbstractArray, metric::PreMetric, a::AbstractMatrix, b::AbstractVector)
     n = size(a, 2)
-    if length(r) != n
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    length(r) == n || throw(DimensionMismatch("Incorrect size of r."))
     for j = 1 : n
         @inbounds r[j] = evaluate(metric, unsafe_view(a, :, j), b)
     end
@@ -53,9 +49,7 @@ end
 
 function colwise!(r::AbstractArray, metric::PreMetric, a::AbstractMatrix, b::AbstractMatrix)
     n = get_common_ncols(a, b)
-    if length(r) != n
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    length(r) == n || throw(DimensionMismatch("Incorrect size of r."))
     for j = 1 : n
         @inbounds r[j] = evaluate(metric, unsafe_view(a, :, j), unsafe_view(b, :, j))
     end
@@ -90,9 +84,7 @@ end
 function pairwise!(r::AbstractMatrix, metric::PreMetric, a::AbstractMatrix, b::AbstractMatrix)
     na = size(a, 2)
     nb = size(b, 2)
-    if !(size(r) == (na, nb))
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    size(r) == (na, nb) || throw(DimensionMismatch("Incorrect size of r."))
     for j = 1 : size(b, 2)
         bj = unsafe_view(b,:,j)
         for i = 1 : size(a, 2)
@@ -108,9 +100,7 @@ end
 
 function pairwise!(r::AbstractMatrix, metric::SemiMetric, a::AbstractMatrix)
     n = size(a, 2)
-    if !(size(r) == (n, n))
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    size(r) == (n, n) || throw(DimensionMismatch("Incorrect size of r."))
     for j = 1 : n
         aj = unsafe_view(a,:,j)
         for i = j+1 : n
