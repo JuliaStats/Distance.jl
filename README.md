@@ -1,6 +1,6 @@
 # Distance.jl
 
-[![Build Status](https://travis-ci.org/lindahua/Distance.jl.png)](https://travis-ci.org/lindahua/Distance.jl)
+[![Build Status](https://travis-ci.org/JuliaStats/Distance.jl.png)](https://travis-ci.org/JuliaStats/Distance.jl)
 
 A Julia package for evaluating distances(metrics) between vectors.
 
