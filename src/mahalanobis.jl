@@ -25,7 +25,7 @@ function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::SqMahalanobis{T}, a:
     Q = dist.qmat
     m::Int, n::Int = get_colwise_dims(size(Q, 1), r, a, b)
     z = a - b
-    dot!(r, Q * z, z, 1)
+    dot!(fill!(r, 0.0), Q * z, z, 1)
 end
 
 function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::SqMahalanobis{T}, a::AbstractVector, b::AbstractMatrix)
@@ -33,7 +33,7 @@ function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::SqMahalanobis{T}, a:
     m::Int, n::Int = get_colwise_dims(size(Q, 1), r, a, b)
     z = a .- b
     Qz = Q * z
-    dot!(r, Q * z, z, 1)
+    dot!(fill!(r, 0.0), Q * z, z, 1)
 end
 
 function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::SqMahalanobis{T}, a::AbstractMatrix, b::AbstractMatrix)
