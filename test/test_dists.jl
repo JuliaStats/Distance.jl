@@ -43,7 +43,7 @@ q = rand(12)
 @test_approx_eq_eps cosine_dist(x, y) (1.0 - 112. / sqrt(19530.)) 1.0e-12
 
 @test_approx_eq_eps corr_dist(x, x) 0. 1.0e-12
-@test_approx_eq corr_dist(x, y) cosine_dist(x - mean(x), y - mean(y))
+@test_approx_eq corr_dist(x, y) cosine_dist(x .- mean(x), y .- mean(y))
 
 @test chisq_dist(x, x) == 0.
 @test chisq_dist(x, y) == sum((x - y).^2 ./ (x + y))

@@ -191,7 +191,7 @@ end
 
 # Correlation Dist
 
-_centralize(x::AbstractVector) = x - mean(x)
+_centralize(x::AbstractVector) = x .- mean(x)
 _centralize(x::AbstractMatrix) = bsubtract(x, mean(x, 1), 2)
 
 evaluate(dist::CorrDist, a::AbstractVector, b::AbstractVector) = cosine_dist(_centralize(a), _centralize(b))

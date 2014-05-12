@@ -1,5 +1,6 @@
 module Distance
 
+using NumericFuns
 using NumericExtensions
 
 export
