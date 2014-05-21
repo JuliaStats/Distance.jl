@@ -1,3 +1,2 @@
-julia 0.2-
-NumericFuns 0.2.2-
-NumericExtensions 0.4-
+julia 0.3-
+ArrayViews 0.4-

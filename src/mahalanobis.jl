@@ -25,7 +25,7 @@ function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::SqMahalanobis{T}, a:
     Q = dist.qmat
     m::Int, n::Int = get_colwise_dims(size(Q, 1), r, a, b)
     z = a - b
-    dot!(fill!(r, 0.0), Q * z, z, 1)
+    dot_percol!(r, Q * z, z)
 end
 
 function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::SqMahalanobis{T}, a::AbstractVector, b::AbstractMatrix)
@@ -33,7 +33,7 @@ function colwise!{T<:FloatingPoint}(r::AbstractArray, dist::SqMahalanobis{T}, a:
     m::Int, n::Int = get_colwise_dims(size(Q, 1), r, a, b)
     z = a .- b
     Qz = Q * z
-    dot!(fill!(r, 0.0), Q * z, z, 1)
+    dot_percol!(r, Q * z, z)
 end
 
 function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::SqMahalanobis{T}, a::AbstractMatrix, b::AbstractMatrix)
@@ -42,8 +42,8 @@ function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::SqMahalanobis{T}, 
 
     Qa = Q * a
     Qb = Q * b
-    sa2 = dot(a, Qa, 1)
-    sb2 = dot(b, Qb, 1)
+    sa2 = dot_percol(a, Qa)
+    sb2 = dot_percol(b, Qb)
     At_mul_B!(r, a, Qb)
 
     for j = 1 : nb
@@ -59,7 +59,7 @@ function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::SqMahalanobis{T}, 
     m::Int, n::Int = get_pairwise_dims(size(Q, 1), r, a)
 
     Qa = Q * a
-    sa2 = dot(a, Qa, 1)
+    sa2 = dot_percol(a, Qa)
     At_mul_B!(r, a, Qa)
 
     for j = 1 : n

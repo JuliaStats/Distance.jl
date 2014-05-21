@@ -6,62 +6,55 @@
 #
 ###########################################################
 
+function get_common_len(a::AbstractVector, b::AbstractVector)
+    n = length(a)
+    length(b) == n || throw(DimensionMismatch("The lengths of a and b must match."))
+    return n
+end
+
+function get_common_len(a::AbstractVector, b::AbstractVector, c::AbstractVector)
+    n = length(a)
+    length(b) == length(c) == n || throw(DimensionMismatch("The lengths of a and b must match."))
+    return n
+end
+
 function get_common_ncols(a::AbstractMatrix, b::AbstractMatrix)
     na = size(a, 2)
-    nb = size(b, 2)
-    if na != nb
-        throw(ArgumentError("The number of columns in a and b must match."))
-    end
+    size(b, 2) == na || throw(DimensionMismatch("The number of columns in a and b must match."))
     return na
 end
 
 function get_colwise_dims(r::AbstractArray, a::AbstractMatrix, b::AbstractMatrix)
-    if !(size(a) == size(b))
-        throw(ArgumentError("The sizes of a and b must match."))
-    end
-    if length(r) != size(a, 2)
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    size(a) == size(b) || throw(DimensionMismatch("The sizes of a and b must match."))
+    length(r) == size(a, 2) || throw(DimensionMismatch("Incorrect size of r."))
     return size(a)
 end
 
 function get_colwise_dims(r::AbstractArray, a::AbstractVector, b::AbstractMatrix)
-    if length(a) != size(b, 1)
-        throw(ArgumentError("The length of a must match the number of rows in b."))
-    end
-    if length(r) != size(b, 2)
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    length(a) == size(b, 1) || 
+        throw(DimensionMismatch("The length of a must match the number of rows in b."))
+    length(r) == size(b, 2) || throw(DimensionMismatch("Incorrect size of r."))
     return size(b)
 end
 
 function get_colwise_dims(r::AbstractArray, a::AbstractMatrix, b::AbstractVector)
-    if !(size(a, 1) == length(b))
-        throw(ArgumentError("The length of b must match the number of rows in a."))
-    end
-    if length(r) != size(a, 2)
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    size(a, 1) == length(b) || 
+        throw(DimensionMismatch("The length of b must match the number of rows in a."))
+    length(r) == size(a, 2) || throw(DimensionMismatch("Incorrect size of r."))
     return size(a)
 end
 
 function get_pairwise_dims(r::AbstractMatrix, a::AbstractMatrix, b::AbstractMatrix)
     ma, na = size(a)
     mb, nb = size(b)
-    if ma != mb
-        throw(ArgumentError("The numbers of rows in a and b must match."))
-    end
-    if !(size(r) == (na, nb))
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    ma == mb || throw(DimensionMismatch("The numbers of rows in a and b must match."))
+    size(r) == (na, nb) || throw(DimensionMismatch("Incorrect size of r."))
     return (ma, na, nb)
 end
 
 function get_pairwise_dims(r::AbstractMatrix, a::AbstractMatrix)
     m, n = size(a)
-    if !(size(r) == (n, n))
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    size(r) == (n, n) || throw(DimensionMismatch("Incorrect size of r."))
     return (m, n)
 end
 
@@ -69,55 +62,93 @@ end
 # for metrics with fixed dimension (e.g. weighted metrics)
 
 function get_colwise_dims(d::Int, r::AbstractArray, a::AbstractMatrix, b::AbstractMatrix)
-    if !(size(a, 1) == size(b, 1) == d)
-        throw(ArgumentError("Incorrect vector dimensions."))
-    end
-    if length(r) != size(a, 2)
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    size(a, 1) == size(b, 1) == d ||
+        throw(DimensionMismatch("Incorrect vector dimensions."))
+    length(r) == size(a, 2) || throw(DimensionMismatch("Incorrect size of r."))
     return size(a)
 end
 
 function get_colwise_dims(d::Int, r::AbstractArray, a::AbstractVector, b::AbstractMatrix)
-    if !(length(a) == size(b, 1) == d)
-        throw(ArgumentError("Incorrect vector dimensions."))
-    end
-    if length(r) != size(b, 2)
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    length(a) == size(b, 1) == d || 
+        throw(DimensionMismatch("Incorrect vector dimensions."))
+    length(r) == size(b, 2) || throw(DimensionMismatch("Incorrect size of r."))
     return size(b)
 end
 
 function get_colwise_dims(d::Int, r::AbstractArray, a::AbstractMatrix, b::AbstractVector)
-    if !(size(a, 1) == length(b) == d)
-        throw(ArgumentError("Incorrect vector dimensions."))
-    end
-    if length(r) != size(a, 2)
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    size(a, 1) == length(b) == d
+        throw(DimensionMismatch("Incorrect vector dimensions."))
+    length(r) == size(a, 2) || throw(DimensionMismatch("Incorrect size of r."))
     return size(a)
 end
 
 function get_pairwise_dims(d::Int, r::AbstractMatrix, a::AbstractMatrix, b::AbstractMatrix)
     na = size(a, 2)
     nb = size(b, 2)
-    if !(size(a, 1) == size(b, 1) == d)
-        throw(ArgumentError("Incorrect vector dimensions."))
-    end
-    if !(size(r) == (na, nb))
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    size(a, 1) == size(b, 1) == d || throw(DimensionMismatch("Incorrect vector dimensions."))
+    size(r) == (na, nb) || throw(DimensionMismatch("Incorrect size of r."))
     return (d, na, nb)
 end
 
 function get_pairwise_dims(d::Int, r::AbstractMatrix, a::AbstractMatrix)
     n = size(a, 2)
-    if !(size(a, 1) == d)
-        throw(ArgumentError("Incorrect vector dimensions."))
-    end
-    if !(size(r) == (n, n))
-        throw(ArgumentError("Incorrect size of r."))
-    end
+    size(a, 1) == d || throw(DimensionMismatch("Incorrect vector dimensions."))
+    size(r) == (n, n) || throw(DimensionMismatch("Incorrect size of r."))
     return (d, n)
 end
+
+###########################################################
+#
+#   calculation
+#
+###########################################################
+
+function sqrt!(a::Array)
+    for i = 1:length(a)
+        @inbounds a[i] = sqrt(a[i])
+    end
+    a
+end
+
+function sumsq_percol(a::AbstractMatrix)
+    m = size(a, 1)
+    n = size(a, 2)
+    r = Array(Float64, n)
+    for j = 1:n
+        aj = view(a,:,j)
+        r[j] = dot(aj, aj)
+    end
+    return r
+end
+
+function wsumsq_percol(w::AbstractArray, a::AbstractMatrix)
+    m = size(a, 1)
+    n = size(a, 2)
+    r = Array(Float64, n)
+    for j = 1:n
+        aj = view(a,:,j)
+        s = 0.
+        for i = 1:m
+            @inbounds s += w[i] * abs2(aj[i])
+        end
+        r[j] = s
+    end
+    return r
+end
+
+function dot_percol!(r::AbstractArray, a::AbstractMatrix, b::AbstractMatrix)
+    m = size(a,1)
+    n = size(a,2)
+    size(b) == (m,n) && length(r) == n || 
+        throw(DimensionMismatch("Inconsistent array dimensions."))
+    for j = 1:n
+        aj = view(a,:,j)
+        bj = view(b,:,j)
+        r[j] = dot(aj, bj)
+    end
+    return r
+end
+
+dot_percol(a::AbstractMatrix, b::AbstractMatrix) = dot_percol!(Array(Float64, size(a,2)), a, b)
+
 

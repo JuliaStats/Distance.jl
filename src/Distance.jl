@@ -1,7 +1,6 @@
 module Distance
 
-using NumericFuns
-using NumericExtensions
+using ArrayViews
 
 export
     # generic types/functions

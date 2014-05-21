@@ -44,6 +44,15 @@ result_type{T}(::WeightedHamming{T}, T1::Type, T2::Type) = T
 
 # Weighted squared Euclidean
 
+function wsumsqdiff(w::AbstractVector, a::AbstractVector, b::AbstractVector)
+    n = get_common_len(w, a, b)::Int
+    s = 0.
+    for i = 1:n
+        @inbounds s += abs2(a[i] - b[i]) * w[i]
+    end
+    s
+end
+
 evaluate{T<:FloatingPoint}(dist::WeightedSqEuclidean{T}, a::AbstractVector, b::AbstractVector) = wsumsqdiff(dist.weights, a, b)
 wsqeuclidean(a::AbstractVector, b::AbstractVector, w::AbstractVector) = evaluate(WeightedSqEuclidean(w), a, b)
 
@@ -51,10 +60,9 @@ function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedSqEuclidea
     w = dist.weights
     m::Int, na::Int, nb::Int = get_pairwise_dims(length(w), r, a, b)
 
-    sa2 = wsumsq(w, a, 1)
-    sb2 = wsumsq(w, b, 1)
-    wB = bmultiply(b, w, 1)
-    At_mul_B!(r, a, wB)
+    sa2 = wsumsq_percol(w, a)
+    sb2 = wsumsq_percol(w, b)
+    At_mul_B!(r, a, b .* w)
 
     for j = 1 : nb
         for i = 1 : na
@@ -68,9 +76,8 @@ function pairwise!{T<:FloatingPoint}(r::AbstractMatrix, dist::WeightedSqEuclidea
     w = dist.weights
     m::Int, n::Int = get_pairwise_dims(length(w), r, a)
 
-    sa2 = wsumsq(w, a, 1)
-    wA = bmultiply(a, w, 1)
-    At_mul_B!(r, a, wA)
+    sa2 = wsumsq_percol(w, a)
+    At_mul_B!(r, a, a .* w)
 
     for j = 1 : n
         for i = 1 : j-1
@@ -112,14 +119,29 @@ end
 
 # Weighted Cityblock
 
-evaluate{T<:FloatingPoint}(dist::WeightedCityblock{T}, a::AbstractVector, b::AbstractVector) = wsumabsdiff(dist.weights, a, b)
+function evaluate{T<:FloatingPoint}(dist::WeightedCityblock{T}, a::AbstractVector, b::AbstractVector) 
+    w = dist.weights
+    n = get_common_len(w, a, b)::Int
+    s = 0.
+    for i = 1:n
+        @inbounds s += w[i] * abs(a[i] - b[i])
+    end
+    s
+end
 wcityblock(a::AbstractVector, b::AbstractVector, w::AbstractVector) = evaluate(WeightedCityblock(w), a, b)
 
 
 # WeightedMinkowski
 
 function evaluate{T<:FloatingPoint}(dist::WeightedMinkowski{T}, a::AbstractVector, b::AbstractVector) 
-    wsumfdiff(dist.weights, FixAbsPow(dist.p), a, b) ^ inv(dist.p)
+    w = dist.weights
+    p = dist.p
+    n = get_common_len(w, a, b)
+    s = 0.
+    for i = 1:n
+        @inbounds s += w[i] * (abs(a[i] - b[i]) .^ p)
+    end
+    s .^ inv(p)
 end
 
 wminkowski(a::AbstractVector, b::AbstractVector, w::AbstractVector, p::Real) = evaluate(WeightedMinkowski(w, p), a, b)

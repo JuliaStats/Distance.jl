@@ -36,14 +36,23 @@ type SpanNormDist <: SemiMetric end
 
 # SqEuclidean
 
+function sumsqdiff(a::AbstractVector, b::AbstractVector)
+    n = get_common_len(a, b)::Int
+    s = 0.
+    for i = 1:n
+        @inbounds s += abs2(a[i] - b[i])
+    end
+    s
+end
+
 evaluate(dist::SqEuclidean, a::AbstractVector, b::AbstractVector) = sumsqdiff(a, b)
 sqeuclidean(a::AbstractVector, b::AbstractVector) = evaluate(SqEuclidean(), a, b)
 
 function pairwise!(r::AbstractMatrix, dist::SqEuclidean, a::AbstractMatrix, b::AbstractMatrix)
     m::Int, na::Int, nb::Int = get_pairwise_dims(r, a, b)
     At_mul_B!(r, a, b)
-    sa2 = sumsq(a, 1)
-    sb2 = sumsq(b, 1)
+    sa2 = sumsq_percol(a)
+    sb2 = sumsq_percol(b)
     for j = 1 : nb
         for i = 1 : na
             @inbounds r[i,j] = sa2[i] + sb2[j] - 2 * r[i,j]
@@ -55,7 +64,7 @@ end
 function pairwise!(r::AbstractMatrix, dist::SqEuclidean, a::AbstractMatrix)
     m::Int, n::Int = get_pairwise_dims(r, a)
     At_mul_B!(r, a, a)
-    sa2 = sumsq(a, 1)
+    sa2 = sumsq_percol(a)
     for j = 1 : n
         for i = 1 : j-1
             @inbounds r[i,j] = r[j,i]
@@ -76,8 +85,8 @@ euclidean(a::AbstractVector, b::AbstractVector) = evaluate(Euclidean(), a, b)
 function pairwise!(r::AbstractMatrix, dist::Euclidean, a::AbstractMatrix, b::AbstractMatrix)
     m::Int, na::Int, nb::Int = get_pairwise_dims(r, a, b)
     At_mul_B!(r, a, b)
-    sa2 = sumsq(a, 1)
-    sb2 = sumsq(b, 1)
+    sa2 = sumsq_percol(a)
+    sb2 = sumsq_percol(b)
     for j = 1 : nb
         for i = 1 : na
             @inbounds v = sa2[i] + sb2[j] - 2 * r[i,j]
@@ -90,7 +99,7 @@ end
 function pairwise!(r::AbstractMatrix, dist::Euclidean, a::AbstractMatrix)
     m::Int, n::Int = get_pairwise_dims(r, a)
     At_mul_B!(r, a, a)
-    sa2 = sumsq(a, 1)
+    sa2 = sumsq_percol(a)
     for j = 1 : n
         for i = 1 : j-1
             @inbounds r[i,j] = r[j,i]
@@ -107,19 +116,44 @@ end
 
 # Cityblock
 
-evaluate(dist::Cityblock, a::AbstractVector, b::AbstractVector) = sumabsdiff(a, b)
+function evaluate(dist::Cityblock, a::AbstractVector, b::AbstractVector)
+    n = get_common_len(a, b)::Int
+    s = 0.
+    for i = 1:n
+        @inbounds s += abs(a[i] - b[i])
+    end
+    s
+end
 cityblock(a::AbstractVector, b::AbstractVector) = evaluate(Cityblock(), a, b)
 
 
 # Chebyshev
 
-evaluate(dist::Chebyshev, a::AbstractVector, b::AbstractVector) = maxabsdiff(a, b)
+function evaluate(dist::Chebyshev, a::AbstractVector, b::AbstractVector) 
+    n = get_common_len(a, b)
+    s = 0.
+    for i = 1:n
+        @inbounds ai = abs(a[i] - b[i])
+        if ai > s
+            s = ai
+        end
+    end
+    s
+end
 chebyshev(a::AbstractVector, b::AbstractVector) = evaluate(Chebyshev(), a, b)
 
 
 # Minkowski
 
-evaluate(dist::Minkowski, a::AbstractVector, b::AbstractVector) = sumfdiff(FixAbsPow(dist.p), a, b) ^ (1/dist.p)
+function evaluate(dist::Minkowski, a::AbstractVector, b::AbstractVector) 
+    n = get_common_len(a, b)
+    s = 0.
+    p = dist.p
+    for i = 1:n
+        @inbounds s += abs(a[i] - b[i]) .^ p
+    end
+    s .^ inv(p)
+end
 minkowski(a::AbstractVector, b::AbstractVector, p::Real) = evaluate(Minkowski(p), a, b)
 
 
@@ -162,8 +196,8 @@ cosine_dist(a::AbstractVector, b::AbstractVector) = evaluate(CosineDist(), a, b)
 function pairwise!(r::AbstractMatrix, dist::CosineDist, a::AbstractMatrix, b::AbstractMatrix)
     m::Int, na::Int, nb::Int = get_pairwise_dims(r, a, b)
     At_mul_B!(r, a, b)
-    ra = sqrt!(sumsq(a, 1))
-    rb = sqrt!(sumsq(b, 1))
+    ra = sqrt!(sumsq_percol(a))
+    rb = sqrt!(sumsq_percol(b))
     for j = 1 : nb
         for i = 1 : na
             @inbounds r[i,j] = max(1 - r[i,j] / (ra[i] * rb[j]), 0)
@@ -175,7 +209,7 @@ end
 function pairwise!(r::AbstractMatrix, dist::CosineDist, a::AbstractMatrix)
     m, n = get_pairwise_dims(r, a)
     At_mul_B!(r, a, a)
-    ra = sqrt!(sumsq(a, 1))
+    ra = sqrt!(sumsq_percol(a))
     for j = 1 : n
         for i = j+1 : n
             @inbounds r[i,j] = max(1 - r[i,j] / (ra[i] * ra[j]), 0)
@@ -192,7 +226,7 @@ end
 # Correlation Dist
 
 _centralize(x::AbstractVector) = x .- mean(x)
-_centralize(x::AbstractMatrix) = bsubtract(x, mean(x, 1), 2)
+_centralize(x::AbstractMatrix) = x .- mean(x, 1)
 
 evaluate(dist::CorrDist, a::AbstractVector, b::AbstractVector) = cosine_dist(_centralize(a), _centralize(b))
 corr_dist(a::AbstractVector, b::AbstractVector) = evaluate(CorrDist(), a, b)

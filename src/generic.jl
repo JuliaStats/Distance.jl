@@ -24,7 +24,7 @@ abstract Metric <: SemiMetric
 
 # Generic functions
 
-result_type(::PreMetric, T1::Type, T2::Type) = fptype(promote_type(T1, T2))
+result_type(::PreMetric, T1::Type, T2::Type) = Float64
 
 
 # Generic column-wise evaluation
