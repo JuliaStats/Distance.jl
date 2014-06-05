@@ -47,8 +47,8 @@ end
 
 evaluate(dist::SqEuclidean, a::AbstractVector, b::AbstractVector) = sumsqdiff(a, b)
 sqeuclidean(a::AbstractVector, b::AbstractVector) = evaluate(SqEuclidean(), a, b)
-evaluate{T <: Real}(dist::SqEuclidean, a::T, b::T) = (a-b)*(a-b)
-sqeuclidean{T <: Real}(a::T, b::T) = evaluate(SqEuclidean(), a, b)
+evaluate{T <: Number}(dist::SqEuclidean, a::T, b::T) = abs2(a-b)
+sqeuclidean{T <: Number}(a::T, b::T) = evaluate(SqEuclidean(), a, b)
 
 function pairwise!(r::AbstractMatrix, dist::SqEuclidean, a::AbstractMatrix, b::AbstractMatrix)
     m::Int, na::Int, nb::Int = get_pairwise_dims(r, a, b)
@@ -83,8 +83,8 @@ end
 
 evaluate(dist::Euclidean, a::AbstractVector, b::AbstractVector) = sqrt(sumsqdiff(a, b))
 euclidean(a::AbstractVector, b::AbstractVector) = evaluate(Euclidean(), a, b)
-evaluate{T <: Real}(dist::Euclidean, a::T, b::T) = abs(a-b)
-euclidean{T <: Real}(a::T, b::T) = evaluate(Euclidean(), a, b)
+evaluate{T <: Number}(dist::Euclidean, a::T, b::T) = abs(a-b)
+euclidean{T <: Number}(a::T, b::T) = evaluate(Euclidean(), a, b)
 
 function pairwise!(r::AbstractMatrix, dist::Euclidean, a::AbstractMatrix, b::AbstractMatrix)
     m::Int, na::Int, nb::Int = get_pairwise_dims(r, a, b)
@@ -129,8 +129,8 @@ function evaluate(dist::Cityblock, a::AbstractVector, b::AbstractVector)
     s
 end
 cityblock(a::AbstractVector, b::AbstractVector) = evaluate(Cityblock(), a, b)
-evaluate{T <: Real}(dist::Cityblock, a::T, b::T) = abs(a-b)
-cityblock{T <: Real}(a::T, b::T) = evaluate(Cityblock(), a, b)
+evaluate{T <: Number}(dist::Cityblock, a::T, b::T) = abs(a-b)
+cityblock{T <: Number}(a::T, b::T) = evaluate(Cityblock(), a, b)
 
 
 # Chebyshev
@@ -147,8 +147,8 @@ function evaluate(dist::Chebyshev, a::AbstractVector, b::AbstractVector)
     s
 end
 chebyshev(a::AbstractVector, b::AbstractVector) = evaluate(Chebyshev(), a, b)
-evaluate{T <: Real}(dist::Chebyshev, a::T, b::T) = abs(a-b)
-chebyshev{T <: Real}(a::T, b::T) = evaluate(Chebyshev(), a, b)
+evaluate{T <: Number}(dist::Chebyshev, a::T, b::T) = abs(a-b)
+chebyshev{T <: Number}(a::T, b::T) = evaluate(Chebyshev(), a, b)
 
 
 # Minkowski
@@ -163,8 +163,8 @@ function evaluate(dist::Minkowski, a::AbstractVector, b::AbstractVector)
     s .^ inv(p)
 end
 minkowski(a::AbstractVector, b::AbstractVector, p::Real) = evaluate(Minkowski(p), a, b)
-evaluate{T <: Real}(dist::Minkowski, a::T, b::T) = abs(a-b)
-minkowski{T <: Real}(a::T, b::T, p::Real) = evaluate(Minkowski(p), a, b)
+evaluate{T <: Number}(dist::Minkowski, a::T, b::T) = abs(a-b)
+minkowski{T <: Number}(a::T, b::T, p::Real) = evaluate(Minkowski(p), a, b)
 
 
 # Hamming
@@ -181,8 +181,8 @@ function evaluate(dist::Hamming, a::AbstractVector, b::AbstractVector)
 end
 
 hamming(a::AbstractVector, b::AbstractVector) = evaluate(Hamming(), a, b)
-evaluate{T <: Real}(dist::Hamming, a::T, b::T) = a != b ? 1 : 0
-hamming{T <: Real}(a::T, b::T) = evaluate(Hamming(), a, b)
+evaluate{T <: Number}(dist::Hamming, a::T, b::T) = a != b ? 1 : 0
+hamming{T <: Number}(a::T, b::T) = evaluate(Hamming(), a, b)
 
 
 # Cosine dist
