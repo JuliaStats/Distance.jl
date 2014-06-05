@@ -10,6 +10,26 @@ using Base.Test
 
 
 # test individual metrics
+a = 1
+b = 2
+@test sqeuclidean(a, a) == 0.
+@test sqeuclidean(a, b) == 1.
+
+@test euclidean(a, a) == 0.
+@test euclidean(a, b) == 1.
+
+@test cityblock(a, a) == 0.
+@test cityblock(a, b) == 1.
+
+@test chebyshev(a, a) == 0.
+@test chebyshev(a, b) == 1.
+
+@test minkowski(a, a, 2) == 0.
+@test minkowski(a, b, 2) == 1.
+
+@test hamming(a, a) == 0
+@test hamming(a, b) == 1
+
 
 x = [4., 5., 6., 7.]
 y = [3., 9., 8., 1.]
