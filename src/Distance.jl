@@ -30,6 +30,7 @@ export
     KLDivergence,
     JSDivergence,
     SpanNormDist,
+    HistIntersection,
 
     WeightedEuclidean,
     WeightedSqEuclidean,
@@ -54,6 +55,7 @@ export
     kl_divergence,
     js_divergence,
     spannorm_dist,
+    histintersect_dist,
 
     weuclidean,
     wsqeuclidean,
