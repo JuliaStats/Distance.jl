@@ -129,6 +129,13 @@ expected_bc_a_b = sum(sqrt(pa .* pb))
 @test_approx_eq_eps bhattacharyya(a, b) (-log(expected_bc_a_b)) 1.0e-12
 @test_approx_eq_eps hellinger(a, b) sqrt(1 - expected_bc_a_b) 1.0e-12
 
+pp = p ./ sum(p)
+pq = q ./ sum(q)
+expected_bc_p_q = sum(sqrt(pp .* pq))
+@test_approx_eq_eps bhattacharyya_coefficient(p, q) expected_bc_p_q 1.0e-12
+@test_approx_eq_eps bhattacharyya(p, q) (-log(expected_bc_p_q)) 1.0e-12
+@test_approx_eq_eps hellinger(p, q) sqrt(1 - expected_bc_p_q) 1.0e-12
+
 
 # test column-wise metrics
 
