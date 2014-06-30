@@ -115,12 +115,19 @@ Q = Q * Q'  # make sure Q is positive-definite
 # Bhattacharyya and Hellinger distances are defined for discrete 
 # probability distributions so to calculate the expected values 
 # we need to normalize vectors.
-probx = x ./ sum(x)
-proby = y ./ sum(y)
-expected_bc_x_y = sum(sqrt(probx .* proby))
+px = x ./ sum(x)
+py = y ./ sum(y)
+expected_bc_x_y = sum(sqrt(px .* py))
 @test_approx_eq_eps bhattacharyya_coefficient(x, y) expected_bc_x_y 1.0e-12
 @test_approx_eq_eps bhattacharyya(x, y) (-log(expected_bc_x_y)) 1.0e-12
 @test_approx_eq_eps hellinger(x, y) sqrt(1 - expected_bc_x_y) 1.0e-12
+
+pa = a ./ sum(a)
+pb = b ./ sum(b)
+expected_bc_a_b = sum(sqrt(pa .* pb))
+@test_approx_eq_eps bhattacharyya_coefficient(a, b) expected_bc_a_b 1.0e-12
+@test_approx_eq_eps bhattacharyya(a, b) (-log(expected_bc_a_b)) 1.0e-12
+@test_approx_eq_eps hellinger(a, b) sqrt(1 - expected_bc_a_b) 1.0e-12
 
 
 # test column-wise metrics
