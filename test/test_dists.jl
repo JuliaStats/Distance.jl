@@ -112,6 +112,16 @@ Q = Q * Q'  # make sure Q is positive-definite
 @test mahalanobis(x, x, Q) == 0.
 @test mahalanobis(x, y, Q) == sqrt(sqmahalanobis(x, y, Q))
 
+# Bhattacharyya and Hellinger distances are defined for discrete 
+# probability distributions so to calculate the expected values 
+# we need to normalize vectors.
+probx = x ./ sum(x)
+proby = y ./ sum(y)
+expected_bc_x_y = sum(sqrt(probx .* proby))
+@test_approx_eq_eps bhattacharyya_coefficient(x, y) expected_bc_x_y 1.0e-12
+@test_approx_eq_eps bhattacharyya(x, y) (-log(expected_bc_x_y)) 1.0e-12
+@test_approx_eq_eps hellinger(x, y) sqrt(1 - expected_bc_x_y) 1.0e-12
+
 
 # test column-wise metrics
 
@@ -157,6 +167,10 @@ end
 @test_colwise KLDivergence() P Q 1.0e-13
 @test_colwise JSDivergence() P Q 1.0e-13
 @test_colwise SpanNormDist() X Y 1.0e-12
+
+@test_colwise BhattacharyyaCoefficient() X Y 1.0e-12
+@test_colwise BhattacharyyaDist() X Y 1.0e-12
+@test_colwise HellingerDist() X Y 1.0e-12
 
 w = rand(m)
 
