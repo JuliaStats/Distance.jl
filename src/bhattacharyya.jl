@@ -2,7 +2,7 @@
 # be compared are probability distributions, frequencies or counts rather than
 # vectors of samples. Pre-calc accordingly.
 
-type BhattacharyyaCoefficient <: SemiMetric end
+type BhattacharyyaCoeff <: SemiMetric end
 
 type BhattacharyyaDist <: SemiMetric end
 
@@ -11,7 +11,7 @@ type HellingerDist <: Metric end
 
 # Bhattacharyya coefficient
 
-function evaluate{T<:Number}(dist::BhattacharyyaCoefficient, a::AbstractVector{T}, b::AbstractVector{T})
+function evaluate{T<:Number}(dist::BhattacharyyaCoeff, a::AbstractVector{T}, b::AbstractVector{T})
     n = length(a)
     sqab = zero(T)
     # We must normalize since we cannot assume that the vectors are normalized to probability vectors.
@@ -29,11 +29,11 @@ function evaluate{T<:Number}(dist::BhattacharyyaCoefficient, a::AbstractVector{T
     sqab / sqrt(asum * bsum) 
 end
 
-BC = BhattacharyyaCoefficient() # Create one so we need not create new ones on each invocation
+BC = BhattacharyyaCoeff() # Create one so we need not create new ones on each invocation
 
-bhattacharyya_coefficient(a::AbstractVector, b::AbstractVector) = evaluate(BC, a, b)
-evaluate{T <: Number}(dist::BhattacharyyaCoefficient, a::T, b::T) = throw("Bhattacharyya coefficient cannot be calculated for scalars")
-bhattacharyya_coefficient{T <: Number}(a::T, b::T) = evaluate(BC, a, b)
+bhattacharyya_coeff(a::AbstractVector, b::AbstractVector) = evaluate(BC, a, b)
+evaluate{T <: Number}(dist::BhattacharyyaCoeff, a::T, b::T) = throw("Bhattacharyya coefficient cannot be calculated for scalars")
+bhattacharyya_coeff{T <: Number}(a::T, b::T) = evaluate(BC, a, b)
 
 # Faster pair- and column-wise versions TBD...
 

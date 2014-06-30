@@ -38,7 +38,6 @@ export
     WeightedHamming,
     SqMahalanobis,
     Mahalanobis,
-    BhattacharyyaCoefficient,
     BhattacharyyaDist,
     HellingerDist,
 
@@ -65,7 +64,6 @@ export
     whamming,
     sqmahalanobis,
     mahalanobis,
-    bhattacharyya_coefficient,
     bhattacharyya,
     hellinger
 
