@@ -1,6 +1,6 @@
 # Bhattacharyya distances. Much like for KLDivergence we assume the vectors to
 # be compared are probability distributions, frequencies or counts rather than
-# vectors of samples. Pre-calc accordingly.
+# vectors of samples. Pre-calc accordingly if you have samples.
 
 type BhattacharyyaCoeff <: SemiMetric end
 

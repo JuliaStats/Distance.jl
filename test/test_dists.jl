@@ -136,6 +136,9 @@ expected_bc_p_q = sum(sqrt(pp .* pq))
 @test_approx_eq_eps bhattacharyya(p, q) (-log(expected_bc_p_q)) 1.0e-12
 @test_approx_eq_eps hellinger(p, q) sqrt(1 - expected_bc_p_q) 1.0e-12
 
+# Ensure it is semimetric
+@test_approx_eq_eps bhattacharyya(x, y) bhattacharyya(y, x) 1.0e-12
+
 
 # test column-wise metrics
 
