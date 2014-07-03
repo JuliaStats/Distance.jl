@@ -185,7 +185,6 @@ end
 @test_colwise JSDivergence() P Q 1.0e-13
 @test_colwise SpanNormDist() X Y 1.0e-12
 
-@test_colwise Distance.BhattacharyyaCoeff() X Y 1.0e-12
 @test_colwise BhattacharyyaDist() X Y 1.0e-12
 @test_colwise HellingerDist() X Y 1.0e-12
 
@@ -247,6 +246,9 @@ end
 @test_pairwise ChiSqDist() X Y 1.0e-12
 @test_pairwise KLDivergence() P Q 1.0e-13
 @test_pairwise JSDivergence() P Q 1.0e-13
+
+@test_pairwise BhattacharyyaDist() X Y 1.0e-12
+@test_pairwise HellingerDist() X Y 1.0e-12
 
 w = rand(m)
 

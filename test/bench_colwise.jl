@@ -54,7 +54,6 @@ Q = Q' * Q
 @bench_colwise_dist 10 KLDivergence() x y
 @bench_colwise_dist  5 JSDivergence() x y
 
-@bench_colwise_dist 10 BhattacharyyaCoefficient() x y
 @bench_colwise_dist 10 BhattacharyyaDist() x y
 @bench_colwise_dist 10 HellingerDist() x y
 
