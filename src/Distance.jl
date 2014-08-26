@@ -1,5 +1,7 @@
 module Distance
 
+warn("The Distance package is deprecated. Please use a new package Distances instead.")
+
 using ArrayViews
 
 export
