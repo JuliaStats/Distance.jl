@@ -1,5 +1,7 @@
 # Distance.jl
 
+**This package is deprecated. Please use [Distances.jl](https://github.com/JuliaStats/Distances.jl) instead.**
+
 [![Build Status](https://travis-ci.org/JuliaStats/Distance.jl.svg?branch=master)](https://travis-ci.org/JuliaStats/Distance.jl)
 
 A Julia package for evaluating distances(metrics) between vectors.
