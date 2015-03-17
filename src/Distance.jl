@@ -1,6 +1,6 @@
 module Distance
 
-warn("The Distance package is deprecated. Please use a new package Distances instead.")
+warn("The Distance.jl package is deprecated. Please use the new package Distances.jl instead.")
 
 using ArrayViews
 
