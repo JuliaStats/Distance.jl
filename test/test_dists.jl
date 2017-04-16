@@ -84,6 +84,9 @@ jsv = kl_divergence(p, pm) / 2 + kl_divergence(q, pm) / 2
 @test spannorm_dist(x, x) == 0.
 @test spannorm_dist(x, y) == maximum(x - y) - minimum(x - y)
 
+@test_approx_eq_eps histintersect_dist(a,a) 0.0 1.0e-12
+@test_approx_eq_eps histintersect_dist(a,b) 1.0-(sum(b)-1.)/sum(b) 1.0e-12
+
 w = rand(size(x))
 
 @test wsqeuclidean(x, x, w) == 0.

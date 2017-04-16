@@ -27,6 +27,8 @@ type JSDivergence <: SemiMetric end
 
 type SpanNormDist <: SemiMetric end
 
+type HistIntersection <: Metric end
+
 
 ###########################################################
 #
@@ -329,4 +331,19 @@ end
 
 spannorm_dist(a::AbstractVector, b::AbstractVector) = evaluate(SpanNormDist(), a, b)
 
+
+# Histogram intersection distance
+
+function evaluate(dist::HistIntersection, a::AbstractVector, b::AbstractVector)
+    d = 0.0
+    sb = 0.0
+    for i = 1 : length(a)
+        @inbounds ai = a[i]
+        @inbounds bi = b[i]
+        d += (ai > bi ? bi : ai)
+        sb += bi
+    end
+    1.0 - d/sb
+end
+histintersect_dist(a::AbstractVector, b::AbstractVector) = evaluate(HistIntersection(), a, b)
 
